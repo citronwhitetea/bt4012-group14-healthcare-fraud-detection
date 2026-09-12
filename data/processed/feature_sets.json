@@ -1,0 +1,39 @@
+{
+  "full_features": [
+    "NumClaims",
+    "PropInpatient",
+    "AvgClaimAmt",
+    "MedianClaimAmt",
+    "StdClaimAmt",
+    "MaxClaimAmt",
+    "DeductibleToReimbursementRatio",
+    "AvgNumDiagnosisCodes",
+    "AvgNumProcedureCodes",
+    "AvgNumPhysiciansInvolved",
+    "NumUniqueAttendingPhysicians",
+    "NumUniqueOperatingPhysicians",
+    "AvgAgeOfBeneficiaries",
+    "PropDeceasedBeneficiaries",
+    "AvgChronicConditions",
+    "AvgClaimsPerBeneficiary",
+    "AvgClaimDurationDays",
+    "AvgLengthOfStayDays"
+  ],
+  "logistic_features": [
+    "NumClaims",
+    "MedianClaimAmt",
+    "StdClaimAmt",
+    "MaxClaimAmt",
+    "DeductibleToReimbursementRatio",
+    "AvgNumDiagnosisCodes",
+    "AvgNumProcedureCodes",
+    "AvgNumPhysiciansInvolved",
+    "NumUniqueAttendingPhysicians",
+    "AvgAgeOfBeneficiaries",
+    "PropDeceasedBeneficiaries",
+    "AvgChronicConditions",
+    "AvgClaimsPerBeneficiary",
+    "AvgClaimDurationDays",
+    "AvgLengthOfStayDays"
+  ]
+}

@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# macOS system files
+.DS_Store
+
+# Raw data — download from Kaggle/sent by Jada in the gc instead of tracking in git (see notebooks/00_setup_guide.ipynb)
+data/raw/*
+!data/raw/.gitkeep
+
+# Processed data — regenerate via notebooks/01, 02, 04 instead of tracking in git
+data/processed/*
+!data/processed/.gitkeep
