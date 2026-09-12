@@ -47,7 +47,7 @@ Column-level reference for all four raw CSVs. Use this alongside `notebooks/00_s
 
 ---
 
-## `inpatients_raw.csv` — Inpatient claims
+## `inpatient_raw.csv` — Inpatient claims
 **Grain:** one row per inpatient claim
 
 | Column | Type | Description |
@@ -70,7 +70,7 @@ Column-level reference for all four raw CSVs. Use this alongside `notebooks/00_s
 
 ---
 
-## `outpatients_raw.csv` — Outpatient claims
+## `outpatient_raw.csv` — Outpatient claims
 **Grain:** one row per outpatient claim
 
 Same schema as Inpatient, **except** it does not have `AdmissionDt`, `DischargeDt`, or `DiagnosisGroupCode` (these are inherently inpatient concepts). All other columns (`BeneID`, `ClaimID`, dates, `InscClaimAmtReimbursed`, physician columns, diagnosis/procedure codes, `DeductibleAmtPaid`) mean the same thing as in the Inpatient table.
