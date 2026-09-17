@@ -12,6 +12,8 @@ import pandas as pd
 
 DATE_COLUMNS = ["ClaimStartDt", "ClaimEndDt", "AdmissionDt", "DischargeDt", "DOB", "DOD"]
 
+PROCEDURE_CODE_COLUMNS = [f"ClmProcedureCode_{i}" for i in range(1, 7)]
+
 CHRONIC_CONDITION_COLUMNS = [
     "ChronicCond_Alzheimer",
     "ChronicCond_Heartfailure",
@@ -46,10 +48,24 @@ def recode_chronic_conditions(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def recode_renal_disease_indicator(df: pd.DataFrame) -> pd.DataFrame:
-    """Recode RenalDiseaseIndicator from {'Y', '0'} strings to {1, 0} integers."""
+    """
+    Recode RenalDiseaseIndicator from {'Y', '0'} strings to {1, 0} integers.
+    Genuinely missing values (NaN) default to 0 ("No"), but any *unmapped,
+    non-null* value (e.g. a new code introduced by a future data refresh)
+    raises loudly instead of silently collapsing into 0 alongside real "No"
+    values.
+    """
     df = df.copy()
     if "RenalDiseaseIndicator" in df.columns:
-        df["RenalDiseaseIndicator"] = df["RenalDiseaseIndicator"].map({"Y": 1, "0": 0}).fillna(0).astype(int)
+        recoded = df["RenalDiseaseIndicator"].map({"Y": 1, "0": 0})
+        unmapped = recoded.isna() & df["RenalDiseaseIndicator"].notna()
+        if unmapped.any():
+            unexpected_values = df.loc[unmapped, "RenalDiseaseIndicator"].unique().tolist()
+            raise ValueError(
+                f"RenalDiseaseIndicator has unexpected values not in {{'Y', '0'}}: "
+                f"{unexpected_values}. Update the recoding map before proceeding."
+            )
+        df["RenalDiseaseIndicator"] = recoded.fillna(0).astype(int)
     return df
 
 
@@ -69,9 +85,10 @@ def add_age_columns(df: pd.DataFrame) -> pd.DataFrame:
       implicitly since dates after death shouldn't exist, but no explicit clipping here)
     """
     df = df.copy()
-    df["IsDeceased"] = df["DOD"].notna().astype(int)
+    if "DOD" in df.columns:
+        df["IsDeceased"] = df["DOD"].notna().astype(int)
 
-    if "ClaimStartDt" in df.columns:
+    if "ClaimStartDt" in df.columns and "DOB" in df.columns:
         age_days = (df["ClaimStartDt"] - df["DOB"]).dt.days
         df["AgeAtClaim"] = (age_days / 365.25).astype("float")
     return df
@@ -88,6 +105,25 @@ def cast_categorical_codes(df: pd.DataFrame) -> pd.DataFrame:
     for col in categorical_code_cols:
         if col in df.columns:
             df[col] = df[col].astype("category")
+    return df
+
+
+def cast_procedure_codes(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cast ClmProcedureCode_* from float64 (a side effect of NaN forcing pandas
+    to upcast an otherwise-integer column when reading the CSV) to string,
+    matching ClmDiagnosisCode_* and DiagnosisGroupCode, which are already
+    object dtype. These are categorical procedure codes, not quantities —
+    left as float, a code like 9904 could get treated as a summable/orderable
+    number by anything downstream that doesn't know better. Missing values
+    stay NaN (not the string "nan").
+    """
+    df = df.copy()
+    for col in PROCEDURE_CODE_COLUMNS:
+        if col in df.columns:
+            is_present = df[col].notna()
+            df[col] = df[col].astype(object)
+            df.loc[is_present, col] = df.loc[is_present, col].astype(int).astype(str)
     return df
 
 
@@ -108,15 +144,57 @@ def add_physician_involvement_count(df: pd.DataFrame) -> pd.DataFrame:
 def fill_structural_missing(df: pd.DataFrame) -> pd.DataFrame:
     """
     Fill missing values that are structurally meaningful rather than 'unknown':
-    - Deductible/reimbursement amount columns: NaN -> 0 (no amount charged/paid)
+    - DeductibleAmtPaid: inpatient claims carry a near-constant Part A
+      deductible ($1,068 whenever present, ~2% missing) — filling those gaps
+      with 0 like a genuine "no charge" would fabricate variance that isn't
+      real. Filled per-ClaimType with that group's own median instead (which
+      resolves to ~1068 for Inpatient and ~0 for Outpatient, matching each
+      claim type's actual distribution), and DeductibleAmtPaidMissing records
+      which rows were originally missing so the imputation stays traceable.
+    - All other Deductible/reimbursement amount columns: NaN -> 0 (no amount
+      charged/paid).
     Admission/Discharge dates and DOD are intentionally left as NaT (missing) —
     they carry meaning (outpatient claim / beneficiary alive) that a fill value
     would destroy. Handle their meaning via IsDeceased and ClaimType instead.
     """
     df = df.copy()
-    amount_cols = [c for c in df.columns if "Deductible" in c or "Reimbursement" in c]
+
+    if "DeductibleAmtPaid" in df.columns:
+        df["DeductibleAmtPaidMissing"] = df["DeductibleAmtPaid"].isna().astype(int)
+        if "ClaimType" in df.columns:
+            fill_values = df.groupby("ClaimType")["DeductibleAmtPaid"].transform("median")
+            df["DeductibleAmtPaid"] = df["DeductibleAmtPaid"].fillna(fill_values)
+        else:
+            df["DeductibleAmtPaid"] = df["DeductibleAmtPaid"].fillna(0)
+
+    amount_cols = [
+        c for c in df.columns
+        if ("Deductible" in c or "Reimbursement" in c) and c != "DeductibleAmtPaid"
+    ]
     for col in amount_cols:
         df[col] = df[col].fillna(0)
+    return df
+
+
+def clip_negative_amounts(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clip negative values in deductible/reimbursement amount columns to 0.
+    A negative reimbursement or deductible isn't a valid claim value — these
+    are rare data-entry errors in the raw data (e.g. IPAnnualReimbursementAmt
+    as low as -$8,000 for a handful of beneficiaries), not a legitimate
+    credit/refund signal. Clipping instead of dropping preserves row count;
+    HadNegativeAmount flags affected rows so the correction stays traceable
+    for anyone aggregating these columns downstream.
+    """
+    df = df.copy()
+    amount_cols = [c for c in df.columns if "Deductible" in c or "Reimbursement" in c]
+
+    had_negative = pd.Series(False, index=df.index)
+    for col in amount_cols:
+        had_negative |= df[col].lt(0).fillna(False)
+        df[col] = df[col].clip(lower=0)
+
+    df["HadNegativeAmount"] = had_negative.astype(int)
     return df
 
 
@@ -128,8 +206,10 @@ def clean_claim_level_dataset(df: pd.DataFrame) -> pd.DataFrame:
     df = recode_fraud_label(df)
     df = add_age_columns(df)
     df = cast_categorical_codes(df)
+    df = cast_procedure_codes(df)
     df = add_physician_involvement_count(df)
     df = fill_structural_missing(df)
+    df = clip_negative_amounts(df)
     return df
 
 
