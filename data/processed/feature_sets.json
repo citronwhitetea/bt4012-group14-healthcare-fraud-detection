@@ -17,7 +17,15 @@
     "AvgChronicConditions",
     "AvgClaimsPerBeneficiary",
     "AvgClaimDurationDays",
-    "AvgLengthOfStayDays"
+    "AvgLengthOfStayDays",
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "AvgPhysicianProviderSpread",
+    "TopBeneficiaryClaimShare",
+    "BenfordMAD",
+    "BenfordMADMissing"
   ],
   "logistic_features": [
     "NumClaims",
@@ -34,6 +42,13 @@
     "AvgChronicConditions",
     "AvgClaimsPerBeneficiary",
     "AvgClaimDurationDays",
-    "AvgLengthOfStayDays"
+    "AvgLengthOfStayDays",
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "AvgPhysicianProviderSpread",
+    "BenfordMAD",
+    "BenfordMADMissing"
   ]
 }
