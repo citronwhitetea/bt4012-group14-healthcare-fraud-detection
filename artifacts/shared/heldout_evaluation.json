@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "selected_run": "artifacts/boosting/20261011_232303_full",
+  "started_at": "2026-10-24T15:03:19.390532+08:00",
+  "selection_record": "artifacts/shared/final_model_selection.json",
+  "completed_at": "2026-10-24T15:03:23.986521+08:00",
+  "test_metrics_sha256": "5b7f0c2cce10ef56b2ed46caaa5f07f79ae299756867b0652b4c07b9cdd72027",
+  "test_predictions_sha256": "4c9a41f7cd3a04df63f26543728f431a3ba721f1ba4ccd57bf0e9c2e6bf0f6d2"
+}
