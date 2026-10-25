@@ -227,3 +227,4 @@ data/raw/*
 # Processed data — regenerate via notebooks/01, 02, 04 instead of tracking in git
 data/processed/*
 !data/processed/.gitkeep
+demo_uploads/

@@ -1,0 +1,8 @@
+altair==5.5.0
+imbalanced-learn==0.12.4
+joblib==1.5.3
+lightgbm==4.6.0
+numpy==2.0.2
+pandas==2.3.3
+scikit-learn==1.6.1
+streamlit==1.50.0
