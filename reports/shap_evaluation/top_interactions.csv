@@ -1,0 +1,11 @@
+feature_a,feature_b,mean_abs_interaction
+NumClaims,MaxClaimAmt,0.11315905683290535
+MaxClaimAmt,AvgLengthOfStayDays,0.06936158880462871
+NumClaims,TopBeneficiaryClaimShare,0.058996459781213026
+MaxClaimAmt,AvgClaimsPerBeneficiary,0.05803432025424407
+DeductibleToReimbursementRatio,AvgClaimsPerBeneficiary,0.05673238952318944
+MedianClaimAmt,MaxClaimAmt,0.05663296484541866
+TopDiagnosisCodeShare,BenfordMAD,0.056049564723994375
+MedianClaimAmt,AvgClaimsPerBeneficiary,0.05292778733385141
+AvgNumDiagnosisCodes,AvgClaimsPerBeneficiary,0.0523358780833408
+AvgClaimAmt,MaxClaimAmt,0.04966599603214902

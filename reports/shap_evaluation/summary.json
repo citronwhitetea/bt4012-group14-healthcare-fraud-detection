@@ -1,0 +1,1994 @@
+{
+  "data": {
+    "n_test": 1082,
+    "n_fraud": 101,
+    "n_flagged": 177,
+    "counts": {
+      "TP": 86,
+      "FP": 91,
+      "FN": 15,
+      "TN": 890
+    },
+    "threshold": 0.08610464772643815,
+    "max_score_diff_vs_saved": 1.1102230246251565e-16,
+    "imputer": [
+      {
+        "feature": "TopDiagnosisCodeShare",
+        "strategy": "median",
+        "fill_value_from_training": 0.0555555555555555,
+        "missing_in_test": 1,
+        "missing_share_test": 0.0009242144177449168
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "strategy": "median",
+        "fill_value_from_training": 0.25,
+        "missing_in_test": 674,
+        "missing_share_test": 0.6229205175600739
+      },
+      {
+        "feature": "BenfordMAD",
+        "strategy": "median",
+        "fill_value_from_training": 0.0336427269921757,
+        "missing_in_test": 416,
+        "missing_share_test": 0.3844731977818854
+      }
+    ]
+  },
+  "shap": {
+    "base_value_logodds": -5.689426812007097,
+    "base_value_prob": 0.0033701344537605273,
+    "threshold_logodds": -2.3621526801295794,
+    "additivity_gap_logodds": 3.730349362740526e-14,
+    "additivity_gap_prob": 3.552713678800501e-15,
+    "shap_package_max_diff": 0.0,
+    "shap_package_base_value": -5.689426812007097
+  },
+  "global": {
+    "table": [
+      {
+        "feature": "MaxClaimAmt",
+        "mean_abs_shap": 0.7429769344235391,
+        "ci_low": 0.7138590705121611,
+        "ci_high": 0.7733020836695299,
+        "share_pct": 14.905238865441834,
+        "rank": 1,
+        "rank_ci_low": 1,
+        "rank_ci_high": 1,
+        "mean_shap_fraud": 1.4527228431131523,
+        "mean_shap_nonfraud": -0.12820980199451956,
+        "direction_spearman": 0.826733557752869,
+        "gain_share_pct": 23.132611040892865,
+        "gain_rank": 1,
+        "split_count": 536
+      },
+      {
+        "feature": "NumClaims",
+        "mean_abs_shap": 0.582058769630631,
+        "ci_low": 0.5390880840721326,
+        "ci_high": 0.6224770192558879,
+        "share_pct": 11.676977565664348,
+        "rank": 2,
+        "rank_ci_low": 2,
+        "rank_ci_high": 2,
+        "mean_shap_fraud": 1.5567095883452284,
+        "mean_shap_nonfraud": -0.11384550549948166,
+        "direction_spearman": 0.9077326220892263,
+        "gain_share_pct": 12.643054979487202,
+        "gain_rank": 2,
+        "split_count": 874
+      },
+      {
+        "feature": "AvgClaimsPerBeneficiary",
+        "mean_abs_shap": 0.45639087658611716,
+        "ci_low": 0.43706520215453765,
+        "ci_high": 0.4765738042601172,
+        "share_pct": 9.155889929210892,
+        "rank": 3,
+        "rank_ci_low": 3,
+        "rank_ci_high": 3,
+        "mean_shap_fraud": 0.36528324782490995,
+        "mean_shap_nonfraud": -0.0418927888989616,
+        "direction_spearman": 0.9326887171573006,
+        "gain_share_pct": 6.337337524178345,
+        "gain_rank": 4,
+        "split_count": 921
+      },
+      {
+        "feature": "AvgLengthOfStayDays",
+        "mean_abs_shap": 0.35504287619632496,
+        "ci_low": 0.3404292900762901,
+        "ci_high": 0.3717565418864159,
+        "share_pct": 7.122696051507539,
+        "rank": 4,
+        "rank_ci_low": 4,
+        "rank_ci_high": 4,
+        "mean_shap_fraud": 0.4229961819054804,
+        "mean_shap_nonfraud": -0.07310227044945006,
+        "direction_spearman": 0.6416138420897732,
+        "gain_share_pct": 4.731672434380778,
+        "gain_rank": 5,
+        "split_count": 573
+      },
+      {
+        "feature": "BenfordMAD",
+        "mean_abs_shap": 0.2540587167791411,
+        "ci_low": 0.24092419065535262,
+        "ci_high": 0.2668525594483522,
+        "share_pct": 5.096801372950885,
+        "rank": 5,
+        "rank_ci_low": 5,
+        "rank_ci_high": 6,
+        "mean_shap_fraud": 0.16463073132635483,
+        "mean_shap_nonfraud": -0.02888412870578648,
+        "direction_spearman": 0.003039854117225041,
+        "gain_share_pct": 3.564135960868699,
+        "gain_rank": 8,
+        "split_count": 715
+      },
+      {
+        "feature": "MedianClaimAmt",
+        "mean_abs_shap": 0.24015439799318009,
+        "ci_low": 0.23562421594266905,
+        "ci_high": 0.24474786882267485,
+        "share_pct": 4.8178597488386945,
+        "rank": 6,
+        "rank_ci_low": 5,
+        "rank_ci_high": 6,
+        "mean_shap_fraud": 0.10705930608678552,
+        "mean_shap_nonfraud": -0.02660421230701917,
+        "direction_spearman": 0.80038195773873,
+        "gain_share_pct": 1.4116862825372092,
+        "gain_rank": 23,
+        "split_count": 234
+      },
+      {
+        "feature": "PropDeceasedBeneficiaries",
+        "mean_abs_shap": 0.20719960006166346,
+        "ci_low": 0.1953227480705203,
+        "ci_high": 0.22067861771360334,
+        "share_pct": 4.156736755413958,
+        "rank": 7,
+        "rank_ci_low": 7,
+        "rank_ci_high": 8,
+        "mean_shap_fraud": 0.003889534454006109,
+        "mean_shap_nonfraud": -0.004435559908056588,
+        "direction_spearman": 0.6605307175540497,
+        "gain_share_pct": 1.9607993364584038,
+        "gain_rank": 17,
+        "split_count": 442
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "mean_abs_shap": 0.19598663854947065,
+        "ci_low": 0.18442013120696948,
+        "ci_high": 0.20711570480955518,
+        "share_pct": 3.9317878209521986,
+        "rank": 8,
+        "rank_ci_low": 7,
+        "rank_ci_high": 8,
+        "mean_shap_fraud": 0.3791186041009059,
+        "mean_shap_nonfraud": -0.04207776801694118,
+        "direction_spearman": -0.8510122903746963,
+        "gain_share_pct": 8.47409403199066,
+        "gain_rank": 3,
+        "split_count": 406
+      },
+      {
+        "feature": "DeductibleToReimbursementRatio",
+        "mean_abs_shap": 0.17044918154114688,
+        "ci_low": 0.16299850149666006,
+        "ci_high": 0.1780077183093148,
+        "share_pct": 3.419467883294444,
+        "rank": 9,
+        "rank_ci_low": 9,
+        "rank_ci_high": 10,
+        "mean_shap_fraud": 0.1440126742270593,
+        "mean_shap_nonfraud": 0.0001364746474841778,
+        "direction_spearman": 0.8309432451827413,
+        "gain_share_pct": 2.472345742910309,
+        "gain_rank": 14,
+        "split_count": 597
+      },
+      {
+        "feature": "AvgClaimAmt",
+        "mean_abs_shap": 0.15848477432358815,
+        "ci_low": 0.15301686320307253,
+        "ci_high": 0.164711612089986,
+        "share_pct": 3.1794438136381036,
+        "rank": 10,
+        "rank_ci_low": 10,
+        "rank_ci_high": 12,
+        "mean_shap_fraud": 0.1675573200716133,
+        "mean_shap_nonfraud": 0.01139749865104935,
+        "direction_spearman": 0.7787149342198116,
+        "gain_share_pct": 1.9304596879835456,
+        "gain_rank": 18,
+        "split_count": 391
+      },
+      {
+        "feature": "TopDiagnosisCodeShare",
+        "mean_abs_shap": 0.15808798453038386,
+        "ci_low": 0.14945696068384193,
+        "ci_high": 0.16675189340651403,
+        "share_pct": 3.171483611412354,
+        "rank": 11,
+        "rank_ci_low": 10,
+        "rank_ci_high": 13,
+        "mean_shap_fraud": 0.11955044768971004,
+        "mean_shap_nonfraud": 0.009621199097430316,
+        "direction_spearman": -0.45349421066430357,
+        "gain_share_pct": 3.1543231635843,
+        "gain_rank": 10,
+        "split_count": 656
+      },
+      {
+        "feature": "AvgNumDiagnosisCodes",
+        "mean_abs_shap": 0.15759955124317954,
+        "ci_low": 0.14943016551103414,
+        "ci_high": 0.16744689645105917,
+        "share_pct": 3.1616849023565172,
+        "rank": 12,
+        "rank_ci_low": 10,
+        "rank_ci_high": 13,
+        "mean_shap_fraud": 0.09223353828635585,
+        "mean_shap_nonfraud": -0.011834048073469031,
+        "direction_spearman": 0.3484719394608869,
+        "gain_share_pct": 2.364935123260307,
+        "gain_rank": 15,
+        "split_count": 545
+      },
+      {
+        "feature": "TopBeneficiaryClaimShare",
+        "mean_abs_shap": 0.1491858831707967,
+        "ci_low": 0.14238625681829553,
+        "ci_high": 0.15594357505267487,
+        "share_pct": 2.992894019971038,
+        "rank": 13,
+        "rank_ci_low": 12,
+        "rank_ci_high": 14,
+        "mean_shap_fraud": 0.17958820852739973,
+        "mean_shap_nonfraud": -0.011013066452822417,
+        "direction_spearman": -0.810982332495285,
+        "gain_share_pct": 2.862873261100533,
+        "gain_rank": 12,
+        "split_count": 612
+      },
+      {
+        "feature": "AvgNumPhysiciansInvolved",
+        "mean_abs_shap": 0.14140688311257812,
+        "ci_low": 0.1348867212423304,
+        "ci_high": 0.14811477520121064,
+        "share_pct": 2.836835536012858,
+        "rank": 14,
+        "rank_ci_low": 13,
+        "rank_ci_high": 16,
+        "mean_shap_fraud": 0.037779989529769895,
+        "mean_shap_nonfraud": 0.009022036778499718,
+        "direction_spearman": -0.5631495686617455,
+        "gain_share_pct": 3.6144603370574417,
+        "gain_rank": 7,
+        "split_count": 796
+      },
+      {
+        "feature": "AvgClaimDurationDays",
+        "mean_abs_shap": 0.13911918312792504,
+        "ci_low": 0.13225288934017082,
+        "ci_high": 0.1460967227785253,
+        "share_pct": 2.7909408209229762,
+        "rank": 15,
+        "rank_ci_low": 14,
+        "rank_ci_high": 17,
+        "mean_shap_fraud": 0.09130148187543045,
+        "mean_shap_nonfraud": -0.029558900020377636,
+        "direction_spearman": 0.5223508696678139,
+        "gain_share_pct": 3.2126374028173674,
+        "gain_rank": 9,
+        "split_count": 654
+      },
+      {
+        "feature": "NumUniqueOperatingPhysicians",
+        "mean_abs_shap": 0.13777658552851413,
+        "ci_low": 0.12841839528184906,
+        "ci_high": 0.14733060328535771,
+        "share_pct": 2.764006286360453,
+        "rank": 16,
+        "rank_ci_low": 14,
+        "rank_ci_high": 18,
+        "mean_shap_fraud": 0.2237871234384914,
+        "mean_shap_nonfraud": 0.0010079596940287354,
+        "direction_spearman": 0.47992202258849637,
+        "gain_share_pct": 1.8291208095514386,
+        "gain_rank": 19,
+        "split_count": 452
+      },
+      {
+        "feature": "AvgAgeOfBeneficiaries",
+        "mean_abs_shap": 0.13096937897927083,
+        "ci_low": 0.12419084524595142,
+        "ci_high": 0.13748987325927947,
+        "share_pct": 2.6274434471633055,
+        "rank": 17,
+        "rank_ci_low": 15,
+        "rank_ci_high": 19,
+        "mean_shap_fraud": 0.05454189675530376,
+        "mean_shap_nonfraud": 0.00651232109466354,
+        "direction_spearman": -0.3428855226035366,
+        "gain_share_pct": 3.9828961959832787,
+        "gain_rank": 6,
+        "split_count": 904
+      },
+      {
+        "feature": "StdClaimAmt",
+        "mean_abs_shap": 0.12958552084421915,
+        "ci_low": 0.12244250151679599,
+        "ci_high": 0.13710652719533756,
+        "share_pct": 2.5996811639709825,
+        "rank": 18,
+        "rank_ci_low": 16,
+        "rank_ci_high": 20,
+        "mean_shap_fraud": 0.19008488048542144,
+        "mean_shap_nonfraud": -0.006229332857805472,
+        "direction_spearman": 0.5950752961435297,
+        "gain_share_pct": 2.1890538562868045,
+        "gain_rank": 16,
+        "split_count": 421
+      },
+      {
+        "feature": "AvgChronicConditions",
+        "mean_abs_shap": 0.123234023005265,
+        "ci_low": 0.11419871794542447,
+        "ci_high": 0.1337944454031271,
+        "share_pct": 2.4722605294173645,
+        "rank": 19,
+        "rank_ci_low": 17,
+        "rank_ci_high": 20,
+        "mean_shap_fraud": 0.007492824899381868,
+        "mean_shap_nonfraud": 0.007272021882079637,
+        "direction_spearman": 0.7076244464490281,
+        "gain_share_pct": 2.5524579287396856,
+        "gain_rank": 13,
+        "split_count": 674
+      },
+      {
+        "feature": "AvgPhysicianProviderSpread",
+        "mean_abs_shap": 0.12280926420314946,
+        "ci_low": 0.11615312493450516,
+        "ci_high": 0.12980067500977943,
+        "share_pct": 2.4637392266522347,
+        "rank": 20,
+        "rank_ci_low": 17,
+        "rank_ci_high": 20,
+        "mean_shap_fraud": -0.013359917284630651,
+        "mean_shap_nonfraud": -0.005124946823448118,
+        "direction_spearman": 0.41690087078470234,
+        "gain_share_pct": 2.906565612700917,
+        "gain_rank": 11,
+        "split_count": 696
+      },
+      {
+        "feature": "PropInpatient",
+        "mean_abs_shap": 0.08433393403494988,
+        "ci_low": 0.08017447673941236,
+        "ci_high": 0.08868145226665293,
+        "share_pct": 1.6918660230396487,
+        "rank": 21,
+        "rank_ci_low": 21,
+        "rank_ci_high": 22,
+        "mean_shap_fraud": 0.0770413695485548,
+        "mean_shap_nonfraud": -0.025344824977682326,
+        "direction_spearman": 0.44976261571986903,
+        "gain_share_pct": 1.499031512388698,
+        "gain_rank": 22,
+        "split_count": 254
+      },
+      {
+        "feature": "AvgNumProcedureCodes",
+        "mean_abs_shap": 0.08417776946670849,
+        "ci_low": 0.07777303752232129,
+        "ci_high": 0.09123271695356881,
+        "share_pct": 1.6887331260624867,
+        "rank": 22,
+        "rank_ci_low": 21,
+        "rank_ci_high": 22,
+        "mean_shap_fraud": 0.07894801736485547,
+        "mean_shap_nonfraud": -0.01128570983039752,
+        "direction_spearman": 0.36911968065175516,
+        "gain_share_pct": 1.5751345169679873,
+        "gain_rank": 21,
+        "split_count": 300
+      },
+      {
+        "feature": "NumUniqueAttendingPhysicians",
+        "mean_abs_shap": 0.0635810329506593,
+        "ci_low": 0.06045062386645751,
+        "ci_high": 0.06681585805076591,
+        "share_pct": 1.275531499744873,
+        "rank": 23,
+        "rank_ci_low": 23,
+        "rank_ci_high": 23,
+        "mean_shap_fraud": 0.06595049688115996,
+        "mean_shap_nonfraud": 0.0017349791586962955,
+        "direction_spearman": 0.7504946775876662,
+        "gain_share_pct": 1.5983132578732275,
+        "gain_rank": 20,
+        "split_count": 400
+      },
+      {
+        "feature": "TopDiagnosisCodeShareMissing",
+        "mean_abs_shap": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "share_pct": 0.0,
+        "rank": 24,
+        "rank_ci_low": 24,
+        "rank_ci_high": 24,
+        "mean_shap_fraud": 0.0,
+        "mean_shap_nonfraud": 0.0,
+        "direction_spearman": null,
+        "gain_share_pct": 0.0,
+        "gain_rank": 24,
+        "split_count": 0
+      },
+      {
+        "feature": "TopProcedureCodeShareMissing",
+        "mean_abs_shap": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "share_pct": 0.0,
+        "rank": 25,
+        "rank_ci_low": 25,
+        "rank_ci_high": 25,
+        "mean_shap_fraud": 0.0,
+        "mean_shap_nonfraud": 0.0,
+        "direction_spearman": null,
+        "gain_share_pct": 0.0,
+        "gain_rank": 25,
+        "split_count": 0
+      },
+      {
+        "feature": "BenfordMADMissing",
+        "mean_abs_shap": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "share_pct": 0.0,
+        "rank": 26,
+        "rank_ci_low": 26,
+        "rank_ci_high": 26,
+        "mean_shap_fraud": 0.0,
+        "mean_shap_nonfraud": 0.0,
+        "direction_spearman": null,
+        "gain_share_pct": 0.0,
+        "gain_rank": 26,
+        "split_count": 0
+      }
+    ],
+    "top3_share_pct": 35.738106360317076,
+    "spearman_shap_vs_gain": 0.7018803418803419,
+    "topk_overlap_shap_gain": 6,
+    "unused_features": [
+      "TopDiagnosisCodeShareMissing",
+      "TopProcedureCodeShareMissing",
+      "BenfordMADMissing"
+    ]
+  },
+  "groups": {
+    "table": [
+      {
+        "group": "Claim amounts",
+        "n_features": 5,
+        "mean_abs_shap": 1.1815598325903136,
+        "sum_member_mean_abs": 1.4416508091256734,
+        "mean_shap_fraud": 2.061437023984032,
+        "mean_shap_nonfraud": -0.14950937386081067,
+        "top_member": "MaxClaimAmt",
+        "share_pct": 30.43353218686485,
+        "cancellation": 1.220125100195025
+      },
+      {
+        "group": "Volume & patient concentration",
+        "n_features": 3,
+        "mean_abs_shap": 0.9872308442610765,
+        "sum_member_mean_abs": 1.1876355293875447,
+        "mean_shap_fraud": 2.1015810446975376,
+        "mean_shap_nonfraud": -0.16675136085126568,
+        "top_member": "NumClaims",
+        "share_pct": 25.428184714792025,
+        "cancellation": 1.202996782658738
+      },
+      {
+        "group": "Care setting & stay length",
+        "n_features": 3,
+        "mean_abs_shap": 0.4662734295252222,
+        "sum_member_mean_abs": 0.5784959933591999,
+        "mean_shap_fraud": 0.5913390333294657,
+        "mean_shap_nonfraud": -0.12800599544751,
+        "top_member": "AvgLengthOfStayDays",
+        "share_pct": 12.009842442110147,
+        "cancellation": 1.2406797315220106
+      },
+      {
+        "group": "Coding patterns",
+        "n_features": 6,
+        "mean_abs_shap": 0.38319927311328583,
+        "sum_member_mean_abs": 0.5958519437897425,
+        "mean_shap_fraud": 0.6698506074418273,
+        "mean_shap_nonfraud": -0.055576326823377424,
+        "top_member": "TopProcedureCodeShare",
+        "share_pct": 9.87009467536634,
+        "cancellation": 1.5549401723775969
+      },
+      {
+        "group": "Physician network",
+        "n_features": 4,
+        "mean_abs_shap": 0.31265682876964807,
+        "sum_member_mean_abs": 0.465573765794901,
+        "mean_shap_fraud": 0.3141576925647906,
+        "mean_shap_nonfraud": 0.006640028807776631,
+        "top_member": "AvgNumPhysiciansInvolved",
+        "share_pct": 8.053127230081994,
+        "cancellation": 1.4890887482835549
+      },
+      {
+        "group": "Beneficiary profile",
+        "n_features": 3,
+        "mean_abs_shap": 0.2974486069855977,
+        "sum_member_mean_abs": 0.4614030020461993,
+        "mean_shap_fraud": 0.06592425610869176,
+        "mean_shap_nonfraud": 0.00934878306868659,
+        "top_member": "PropDeceasedBeneficiaries",
+        "share_pct": 7.6614078313654685,
+        "cancellation": 1.5512024303026577
+      },
+      {
+        "group": "Benford's Law",
+        "n_features": 2,
+        "mean_abs_shap": 0.25405871677914144,
+        "sum_member_mean_abs": 0.2540587167791411,
+        "mean_shap_fraud": 0.16463073132635483,
+        "mean_shap_nonfraud": -0.02888412870578648,
+        "top_member": "BenfordMAD",
+        "share_pct": 6.543810919419171,
+        "cancellation": 0.9999999999999987
+      }
+    ],
+    "correlated_pairs": [
+      {
+        "feature_a": "AvgNumProcedureCodes",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.9640028923814832,
+        "shap_rank_a": 22,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.9509104056401939,
+        "shap_rank_a": 21,
+        "shap_rank_b": 22
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.9267270356322561,
+        "shap_rank_a": 21,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "StdClaimAmt",
+        "feature_b": "MaxClaimAmt",
+        "spearman": 0.9198758424857219,
+        "shap_rank_a": 18,
+        "shap_rank_b": 1
+      },
+      {
+        "feature_a": "AvgLengthOfStayDays",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.9087399224420322,
+        "shap_rank_a": 4,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.9048960333290651,
+        "shap_rank_a": 21,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "StdClaimAmt",
+        "spearman": 0.901354347583354,
+        "shap_rank_a": 10,
+        "shap_rank_b": 18
+      },
+      {
+        "feature_a": "AvgNumProcedureCodes",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.8971525383854849,
+        "shap_rank_a": 22,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "NumUniqueAttendingPhysicians",
+        "feature_b": "NumUniqueOperatingPhysicians",
+        "spearman": 0.8948259214186547,
+        "shap_rank_a": 23,
+        "shap_rank_b": 16
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "TopDiagnosisCodeShare",
+        "spearman": -0.8905231871496607,
+        "shap_rank_a": 2,
+        "shap_rank_b": 11
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "MaxClaimAmt",
+        "spearman": 0.8673559499814398,
+        "shap_rank_a": 10,
+        "shap_rank_b": 1
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "TopBeneficiaryClaimShare",
+        "spearman": -0.8642007232434133,
+        "shap_rank_a": 2,
+        "shap_rank_b": 13
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "AvgClaimAmt",
+        "spearman": 0.8460901748738477,
+        "shap_rank_a": 21,
+        "shap_rank_b": 10
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "BenfordMADMissing",
+        "spearman": -0.8427289594410095,
+        "shap_rank_a": 2,
+        "shap_rank_b": 26
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.8190645107129632,
+        "shap_rank_a": 10,
+        "shap_rank_b": 22
+      },
+      {
+        "feature_a": "MaxClaimAmt",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.8142479001115124,
+        "shap_rank_a": 1,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "MaxClaimAmt",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.8135582926250703,
+        "shap_rank_a": 1,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "DeductibleToReimbursementRatio",
+        "spearman": 0.8072282813502666,
+        "shap_rank_a": 21,
+        "shap_rank_b": 9
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "MaxClaimAmt",
+        "spearman": 0.8032308189821296,
+        "shap_rank_a": 21,
+        "shap_rank_b": 1
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "NumUniqueOperatingPhysicians",
+        "spearman": 0.7988805971883788,
+        "shap_rank_a": 2,
+        "shap_rank_b": 16
+      },
+      {
+        "feature_a": "MaxClaimAmt",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.7983223611712136,
+        "shap_rank_a": 1,
+        "shap_rank_b": 22
+      },
+      {
+        "feature_a": "TopDiagnosisCodeShare",
+        "feature_b": "BenfordMADMissing",
+        "spearman": 0.7905509580930752,
+        "shap_rank_a": 11,
+        "shap_rank_b": 26
+      },
+      {
+        "feature_a": "StdClaimAmt",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.7900290086611776,
+        "shap_rank_a": 18,
+        "shap_rank_b": 22
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "StdClaimAmt",
+        "spearman": 0.7830717374490546,
+        "shap_rank_a": 21,
+        "shap_rank_b": 18
+      },
+      {
+        "feature_a": "StdClaimAmt",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.7827630036951566,
+        "shap_rank_a": 18,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.7824921245222971,
+        "shap_rank_a": 10,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "StdClaimAmt",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.7780399801841933,
+        "shap_rank_a": 18,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.7775989588429179,
+        "shap_rank_a": 10,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "TopDiagnosisCodeShare",
+        "feature_b": "TopBeneficiaryClaimShare",
+        "spearman": 0.7733495158747452,
+        "shap_rank_a": 11,
+        "shap_rank_b": 13
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "BenfordMAD",
+        "spearman": -0.7692026779945746,
+        "shap_rank_a": 2,
+        "shap_rank_b": 5
+      },
+      {
+        "feature_a": "NumUniqueOperatingPhysicians",
+        "feature_b": "TopBeneficiaryClaimShare",
+        "spearman": -0.7580374172523666,
+        "shap_rank_a": 16,
+        "shap_rank_b": 13
+      },
+      {
+        "feature_a": "DeductibleToReimbursementRatio",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.7578805933441116,
+        "shap_rank_a": 9,
+        "shap_rank_b": 22
+      },
+      {
+        "feature_a": "DeductibleToReimbursementRatio",
+        "feature_b": "AvgLengthOfStayDays",
+        "spearman": 0.7551293197031422,
+        "shap_rank_a": 9,
+        "shap_rank_b": 4
+      },
+      {
+        "feature_a": "DeductibleToReimbursementRatio",
+        "feature_b": "TopProcedureCodeShareMissing",
+        "spearman": -0.7455373812331727,
+        "shap_rank_a": 9,
+        "shap_rank_b": 25
+      },
+      {
+        "feature_a": "PropInpatient",
+        "feature_b": "AvgNumDiagnosisCodes",
+        "spearman": 0.7362292524655363,
+        "shap_rank_a": 21,
+        "shap_rank_b": 12
+      },
+      {
+        "feature_a": "NumUniqueOperatingPhysicians",
+        "feature_b": "TopDiagnosisCodeShare",
+        "spearman": -0.7228497713551755,
+        "shap_rank_a": 16,
+        "shap_rank_b": 11
+      },
+      {
+        "feature_a": "TopBeneficiaryClaimShare",
+        "feature_b": "BenfordMADMissing",
+        "spearman": 0.7161176768700603,
+        "shap_rank_a": 13,
+        "shap_rank_b": 26
+      },
+      {
+        "feature_a": "AvgNumDiagnosisCodes",
+        "feature_b": "AvgNumProcedureCodes",
+        "spearman": 0.7068846611956064,
+        "shap_rank_a": 12,
+        "shap_rank_b": 22
+      }
+    ]
+  },
+  "dependence_deciles": [
+    {
+      "bin": 0,
+      "feature": "MaxClaimAmt",
+      "x_min": 0.0,
+      "x_max": 400.0,
+      "mean_shap": -0.5425406288790976
+    },
+    {
+      "bin": 1,
+      "feature": "MaxClaimAmt",
+      "x_min": 400.0,
+      "x_max": 1100.0,
+      "mean_shap": -0.6474053033247564
+    },
+    {
+      "bin": 2,
+      "feature": "MaxClaimAmt",
+      "x_min": 1100.0,
+      "x_max": 2100.0,
+      "mean_shap": -0.6203871772925157
+    },
+    {
+      "bin": 3,
+      "feature": "MaxClaimAmt",
+      "x_min": 2100.0,
+      "x_max": 3100.0,
+      "mean_shap": -0.6724096632415246
+    },
+    {
+      "bin": 4,
+      "feature": "MaxClaimAmt",
+      "x_min": 3100.0,
+      "x_max": 3300.0,
+      "mean_shap": -0.5774481539127941
+    },
+    {
+      "bin": 5,
+      "feature": "MaxClaimAmt",
+      "x_min": 3300.0,
+      "x_max": 5100.0,
+      "mean_shap": -0.47959558309315
+    },
+    {
+      "bin": 6,
+      "feature": "MaxClaimAmt",
+      "x_min": 5200.0,
+      "x_max": 14000.0,
+      "mean_shap": -0.0007311815843186665
+    },
+    {
+      "bin": 7,
+      "feature": "MaxClaimAmt",
+      "x_min": 14000.0,
+      "x_max": 24000.0,
+      "mean_shap": 0.501186402664533
+    },
+    {
+      "bin": 8,
+      "feature": "MaxClaimAmt",
+      "x_min": 24000.0,
+      "x_max": 44000.0,
+      "mean_shap": 1.1652964641489485
+    },
+    {
+      "bin": 9,
+      "feature": "MaxClaimAmt",
+      "x_min": 44000.0,
+      "x_max": 125000.0,
+      "mean_shap": 2.0540320465529245
+    },
+    {
+      "bin": 0,
+      "feature": "NumClaims",
+      "x_min": 1.0,
+      "x_max": 3.0,
+      "mean_shap": -0.46371981684146896
+    },
+    {
+      "bin": 1,
+      "feature": "NumClaims",
+      "x_min": 3.0,
+      "x_max": 7.0,
+      "mean_shap": -0.5324406614514496
+    },
+    {
+      "bin": 2,
+      "feature": "NumClaims",
+      "x_min": 7.0,
+      "x_max": 13.0,
+      "mean_shap": -0.5566419843737521
+    },
+    {
+      "bin": 3,
+      "feature": "NumClaims",
+      "x_min": 13.0,
+      "x_max": 21.0,
+      "mean_shap": -0.3898267038857024
+    },
+    {
+      "bin": 4,
+      "feature": "NumClaims",
+      "x_min": 21.0,
+      "x_max": 31.0,
+      "mean_shap": -0.3799667614623352
+    },
+    {
+      "bin": 5,
+      "feature": "NumClaims",
+      "x_min": 31.0,
+      "x_max": 48.0,
+      "mean_shap": -0.27157814331519176
+    },
+    {
+      "bin": 6,
+      "feature": "NumClaims",
+      "x_min": 48.0,
+      "x_max": 76.0,
+      "mean_shap": -0.0872036835087087
+    },
+    {
+      "bin": 7,
+      "feature": "NumClaims",
+      "x_min": 76.0,
+      "x_max": 124.0,
+      "mean_shap": 0.10513634962892159
+    },
+    {
+      "bin": 8,
+      "feature": "NumClaims",
+      "x_min": 126.0,
+      "x_max": 259.0,
+      "mean_shap": 0.5129255543711986
+    },
+    {
+      "bin": 9,
+      "feature": "NumClaims",
+      "x_min": 260.0,
+      "x_max": 4739.0,
+      "mean_shap": 2.466486781974998
+    },
+    {
+      "bin": 0,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.0,
+      "x_max": 1.0,
+      "mean_shap": -0.4890969258059962
+    },
+    {
+      "bin": 1,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.0,
+      "x_max": 1.0,
+      "mean_shap": -0.5031503720926525
+    },
+    {
+      "bin": 2,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.0,
+      "x_max": 1.0,
+      "mean_shap": -0.4611277434996087
+    },
+    {
+      "bin": 3,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.0,
+      "x_max": 1.0508474576271187,
+      "mean_shap": -0.427363249353305
+    },
+    {
+      "bin": 4,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.051282051282051,
+      "x_max": 1.0947368421052632,
+      "mean_shap": -0.17155617944037077
+    },
+    {
+      "bin": 5,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.0952380952380951,
+      "x_max": 1.1666666666666667,
+      "mean_shap": -0.10668949323049999
+    },
+    {
+      "bin": 6,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.1666666666666667,
+      "x_max": 1.28125,
+      "mean_shap": 0.03095897320497933
+    },
+    {
+      "bin": 7,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.28125,
+      "x_max": 1.5483870967741935,
+      "mean_shap": 0.34028979972098244
+    },
+    {
+      "bin": 8,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 1.5571428571428572,
+      "x_max": 2.026315789473684,
+      "mean_shap": 0.5454032231572887
+    },
+    {
+      "bin": 9,
+      "feature": "AvgClaimsPerBeneficiary",
+      "x_min": 2.0348837209302326,
+      "x_max": 4.538461538461538,
+      "mean_shap": 1.1968599221914888
+    },
+    {
+      "bin": 0,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.2455481017270536
+    },
+    {
+      "bin": 1,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.25223718176971827
+    },
+    {
+      "bin": 2,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.25660987593894696
+    },
+    {
+      "bin": 3,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.2529756658206982
+    },
+    {
+      "bin": 4,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.24767728107493683
+    },
+    {
+      "bin": 5,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 0.0,
+      "mean_shap": -0.2500791229047501
+    },
+    {
+      "bin": 6,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 0.0,
+      "x_max": 3.909090909090909,
+      "mean_shap": -0.2851530207215269
+    },
+    {
+      "bin": 7,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 4.0,
+      "x_max": 5.0588235294117645,
+      "mean_shap": -0.040027212759040004
+    },
+    {
+      "bin": 8,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 5.071428571428571,
+      "x_max": 6.3478260869565215,
+      "mean_shap": 0.5466069471327755
+    },
+    {
+      "bin": 9,
+      "feature": "AvgLengthOfStayDays",
+      "x_min": 6.4,
+      "x_max": 35.0,
+      "mean_shap": 1.008206338039732
+    },
+    {
+      "bin": 0,
+      "feature": "BenfordMAD",
+      "x_min": 0.0075686544479656,
+      "x_max": 0.0191394382755117,
+      "mean_shap": 0.6714890997655626
+    },
+    {
+      "bin": 1,
+      "feature": "BenfordMAD",
+      "x_min": 0.0191440153241595,
+      "x_max": 0.0231488213265139,
+      "mean_shap": 0.23036383007894776
+    },
+    {
+      "bin": 2,
+      "feature": "BenfordMAD",
+      "x_min": 0.0231948039341581,
+      "x_max": 0.026188770002705,
+      "mean_shap": 0.03752946657786874
+    },
+    {
+      "bin": 3,
+      "feature": "BenfordMAD",
+      "x_min": 0.0262736568042199,
+      "x_max": 0.0297228028959268,
+      "mean_shap": -0.06620864744811171
+    },
+    {
+      "bin": 4,
+      "feature": "BenfordMAD",
+      "x_min": 0.0297802743216086,
+      "x_max": 0.0332289813367104,
+      "mean_shap": -0.1392812923178561
+    },
+    {
+      "bin": 5,
+      "feature": "BenfordMAD",
+      "x_min": 0.0333339838862895,
+      "x_max": 0.0377459114438786,
+      "mean_shap": -0.17213048182250443
+    },
+    {
+      "bin": 6,
+      "feature": "BenfordMAD",
+      "x_min": 0.0379821565182367,
+      "x_max": 0.0421212026548898,
+      "mean_shap": -0.016144144153104438
+    },
+    {
+      "bin": 7,
+      "feature": "BenfordMAD",
+      "x_min": 0.0422063605573171,
+      "x_max": 0.0479957703260156,
+      "mean_shap": -0.006797993468896
+    },
+    {
+      "bin": 8,
+      "feature": "BenfordMAD",
+      "x_min": 0.0479998444601012,
+      "x_max": 0.0571026558474901,
+      "mean_shap": 0.4327518882762389
+    },
+    {
+      "bin": 9,
+      "feature": "BenfordMAD",
+      "x_min": 0.0575567118822199,
+      "x_max": 0.0997711120746708,
+      "mean_shap": 0.5177266887741687
+    },
+    {
+      "bin": 0,
+      "feature": "MedianClaimAmt",
+      "x_min": 0.0,
+      "x_max": 60.0,
+      "mean_shap": -0.24739526613710022
+    },
+    {
+      "bin": 1,
+      "feature": "MedianClaimAmt",
+      "x_min": 60.0,
+      "x_max": 70.0,
+      "mean_shap": -0.26597216337707574
+    },
+    {
+      "bin": 2,
+      "feature": "MedianClaimAmt",
+      "x_min": 70.0,
+      "x_max": 70.0,
+      "mean_shap": -0.263859640773077
+    },
+    {
+      "bin": 3,
+      "feature": "MedianClaimAmt",
+      "x_min": 70.0,
+      "x_max": 80.0,
+      "mean_shap": -0.24161096894550352
+    },
+    {
+      "bin": 4,
+      "feature": "MedianClaimAmt",
+      "x_min": 80.0,
+      "x_max": 80.0,
+      "mean_shap": -0.22831365469957934
+    },
+    {
+      "bin": 5,
+      "feature": "MedianClaimAmt",
+      "x_min": 80.0,
+      "x_max": 90.0,
+      "mean_shap": 0.15725915216269198
+    },
+    {
+      "bin": 6,
+      "feature": "MedianClaimAmt",
+      "x_min": 90.0,
+      "x_max": 100.0,
+      "mean_shap": 0.21816377294337985
+    },
+    {
+      "bin": 7,
+      "feature": "MedianClaimAmt",
+      "x_min": 100.0,
+      "x_max": 200.0,
+      "mean_shap": 0.23422169595966194
+    },
+    {
+      "bin": 8,
+      "feature": "MedianClaimAmt",
+      "x_min": 200.0,
+      "x_max": 3000.0,
+      "mean_shap": 0.26539185673383614
+    },
+    {
+      "bin": 9,
+      "feature": "MedianClaimAmt",
+      "x_min": 3000.0,
+      "x_max": 57000.0,
+      "mean_shap": 0.2307348279821592
+    }
+  ],
+  "missing": [
+    {
+      "feature": "TopDiagnosisCodeShare",
+      "status": "missing",
+      "n": 1,
+      "fraud_rate": 0.0,
+      "mean_shap_value": 0.052058381267036276,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": 0.052058381267036276,
+      "mean_abs_combined": 0.052058381267036276
+    },
+    {
+      "feature": "TopDiagnosisCodeShare",
+      "status": "present",
+      "n": 1081,
+      "fraud_rate": 0.09343200740055504,
+      "mean_shap_value": 0.019852852127634428,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": 0.019852852127634428,
+      "mean_abs_combined": 0.1581860692697578
+    },
+    {
+      "feature": "TopProcedureCodeShare",
+      "status": "missing",
+      "n": 674,
+      "fraud_rate": 0.016320474777448073,
+      "mean_shap_value": -0.06869390869591059,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": -0.06869390869591059,
+      "mean_abs_combined": 0.06948362993001495
+    },
+    {
+      "feature": "TopProcedureCodeShare",
+      "status": "present",
+      "n": 408,
+      "fraud_rate": 0.22058823529411764,
+      "mean_shap_value": 0.1061578015946469,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": 0.1061578015946469,
+      "mean_abs_combined": 0.4049646478865126
+    },
+    {
+      "feature": "BenfordMAD",
+      "status": "missing",
+      "n": 416,
+      "fraud_rate": 0.01201923076923077,
+      "mean_shap_value": -0.267249433253862,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": -0.267249433253862,
+      "mean_abs_combined": 0.267249433253862
+    },
+    {
+      "feature": "BenfordMAD",
+      "status": "present",
+      "n": 666,
+      "fraud_rate": 0.14414414414414414,
+      "mean_shap_value": 0.14935155831410193,
+      "mean_shap_flag": 0.0,
+      "mean_shap_combined": 0.14935155831410193,
+      "mean_abs_combined": 0.24581947045258917
+    }
+  ],
+  "domain": [
+    {
+      "feature": "BenfordMAD",
+      "rank": 5,
+      "rank_ci_low": 5,
+      "rank_ci_high": 6,
+      "mean_abs_shap": 0.2540587167791411,
+      "share_pct": 5.096801372950885,
+      "direction_spearman": 0.003039854117225041,
+      "gain_rank": 8
+    },
+    {
+      "feature": "AvgPhysicianProviderSpread",
+      "rank": 20,
+      "rank_ci_low": 17,
+      "rank_ci_high": 20,
+      "mean_abs_shap": 0.12280926420314946,
+      "share_pct": 2.4637392266522347,
+      "direction_spearman": 0.41690087078470234,
+      "gain_rank": 11
+    },
+    {
+      "feature": "BenfordMADMissing",
+      "rank": 26,
+      "rank_ci_low": 26,
+      "rank_ci_high": 26,
+      "mean_abs_shap": 0.0,
+      "share_pct": 0.0,
+      "direction_spearman": null,
+      "gain_rank": 26
+    }
+  ],
+  "interactions": {
+    "top": [
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "MaxClaimAmt",
+        "mean_abs_interaction": 0.11315905683290535
+      },
+      {
+        "feature_a": "MaxClaimAmt",
+        "feature_b": "AvgLengthOfStayDays",
+        "mean_abs_interaction": 0.06936158880462871
+      },
+      {
+        "feature_a": "NumClaims",
+        "feature_b": "TopBeneficiaryClaimShare",
+        "mean_abs_interaction": 0.058996459781213026
+      },
+      {
+        "feature_a": "MaxClaimAmt",
+        "feature_b": "AvgClaimsPerBeneficiary",
+        "mean_abs_interaction": 0.05803432025424407
+      },
+      {
+        "feature_a": "DeductibleToReimbursementRatio",
+        "feature_b": "AvgClaimsPerBeneficiary",
+        "mean_abs_interaction": 0.05673238952318944
+      },
+      {
+        "feature_a": "MedianClaimAmt",
+        "feature_b": "MaxClaimAmt",
+        "mean_abs_interaction": 0.05663296484541866
+      },
+      {
+        "feature_a": "TopDiagnosisCodeShare",
+        "feature_b": "BenfordMAD",
+        "mean_abs_interaction": 0.056049564723994375
+      },
+      {
+        "feature_a": "MedianClaimAmt",
+        "feature_b": "AvgClaimsPerBeneficiary",
+        "mean_abs_interaction": 0.05292778733385141
+      },
+      {
+        "feature_a": "AvgNumDiagnosisCodes",
+        "feature_b": "AvgClaimsPerBeneficiary",
+        "mean_abs_interaction": 0.0523358780833408
+      },
+      {
+        "feature_a": "AvgClaimAmt",
+        "feature_b": "MaxClaimAmt",
+        "mean_abs_interaction": 0.04966599603214902
+      }
+    ],
+    "sum_main": 5.283704858424489,
+    "sum_pairwise": 5.150489659912598
+  },
+  "outcomes": {
+    "profile": [
+      {
+        "feature": "MaxClaimAmt",
+        "mean_shap_TP": 1.6138845034544365,
+        "mean_shap_FP": 1.3492820501125211,
+        "mean_shap_FN": 0.5287293238231237,
+        "mean_shap_TN": -0.2792791936144529,
+        "median_value_TP": 52000.0,
+        "median_value_FP": 36000.0,
+        "median_value_FN": 14000.0,
+        "median_value_TN": 3300.0
+      },
+      {
+        "feature": "NumClaims",
+        "mean_shap_TP": 1.7642311090170055,
+        "mean_shap_FP": 0.5974059102164441,
+        "mean_shap_FN": 0.3669195364937033,
+        "mean_shap_TN": -0.18656896485919994,
+        "median_value_TP": 251.5,
+        "median_value_FP": 117.0,
+        "median_value_FN": 74.0,
+        "median_value_TN": 24.0
+      },
+      {
+        "feature": "AvgClaimsPerBeneficiary",
+        "mean_shap_TP": 0.3744995386982869,
+        "mean_shap_FP": 0.27436274464519433,
+        "mean_shap_FN": 0.31244318015088113,
+        "mean_shap_TN": -0.07422902884561125,
+        "median_value_TP": 1.2296703296703297,
+        "median_value_FP": 1.1538461538461535,
+        "median_value_FN": 1.4814814814814814,
+        "median_value_TN": 1.0685736677115987
+      },
+      {
+        "feature": "AvgLengthOfStayDays",
+        "mean_shap_TP": 0.4220274737939245,
+        "mean_shap_FP": 0.48991698841183606,
+        "mean_shap_FN": 0.428550108411735,
+        "mean_shap_TN": -0.13066940815324446,
+        "median_value_TP": 5.759297520661157,
+        "median_value_FP": 5.533333333333333,
+        "median_value_FN": 5.909090909090909,
+        "median_value_TN": 0.0
+      },
+      {
+        "feature": "BenfordMAD",
+        "mean_shap_TP": 0.19335704263724415,
+        "mean_shap_FP": 0.1708512282717011,
+        "mean_shap_FN": -6.678685607749239e-05,
+        "mean_shap_TN": -0.04930650790236105,
+        "median_value_TP": 0.02460225975121295,
+        "median_value_FP": 0.0264025763185196,
+        "median_value_FN": 0.0296198854989932,
+        "median_value_TN": 0.0360761041184411
+      },
+      {
+        "feature": "MedianClaimAmt",
+        "mean_shap_TP": 0.12638283770364997,
+        "mean_shap_FP": 0.09343031316623507,
+        "mean_shap_FN": -0.0037289418499037922,
+        "mean_shap_TN": -0.038877405361026074,
+        "median_value_TP": 100.0,
+        "median_value_FP": 100.0,
+        "median_value_FN": 90.0,
+        "median_value_TN": 80.0
+      },
+      {
+        "feature": "PropDeceasedBeneficiaries",
+        "mean_shap_TP": -0.0036541273062871285,
+        "mean_shap_FP": 0.09383772043013337,
+        "mean_shap_FN": 0.047139861879687335,
+        "mean_shap_TN": -0.014483726774096236,
+        "median_value_TP": 0.0062759034839878,
+        "median_value_FP": 0.007396449704142,
+        "median_value_FN": 0.0,
+        "median_value_TN": 0.0
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "mean_shap_TP": 0.4529375926885896,
+        "mean_shap_FP": 0.32754423458022647,
+        "mean_shap_FN": -0.04411026380181458,
+        "mean_shap_TN": -0.07987057951844934,
+        "median_value_TP": 0.0952380952380952,
+        "median_value_FP": 0.1666666666666666,
+        "median_value_FN": 0.3333333333333333,
+        "median_value_TN": 0.5
+      },
+      {
+        "feature": "DeductibleToReimbursementRatio",
+        "mean_shap_TP": 0.1457329383755077,
+        "mean_shap_FP": 0.13198373576075864,
+        "mean_shap_FN": 0.13414982644262186,
+        "mean_shap_TN": -0.013344537443873102,
+        "median_value_TP": 0.0858700233917134,
+        "median_value_FP": 0.0853016276090935,
+        "median_value_FN": 0.0734245410966181,
+        "median_value_TN": 0.011675636876665799
+      },
+      {
+        "feature": "AvgClaimAmt",
+        "mean_shap_TP": 0.17145456036988888,
+        "mean_shap_FP": 0.17156934402172647,
+        "mean_shap_FN": 0.14521314236150015,
+        "mean_shap_TN": -0.004979622617188421,
+        "median_value_TP": 2689.2687074829932,
+        "median_value_FP": 2060.729613733906,
+        "median_value_FN": 1451.0526315789473,
+        "median_value_TN": 313.73376623376623
+      },
+      {
+        "feature": "TopDiagnosisCodeShare",
+        "mean_shap_TP": 0.1431049233996878,
+        "mean_shap_FP": 0.12302375022066188,
+        "mean_shap_FN": -0.015495213047495803,
+        "mean_shap_TN": -0.0019738932084281944,
+        "median_value_TP": 0.0299247305972542,
+        "median_value_FP": 0.0353982300884955,
+        "median_value_FN": 0.0410958904109589,
+        "median_value_TN": 0.0666666666666666
+      },
+      {
+        "feature": "AvgNumDiagnosisCodes",
+        "mean_shap_TP": 0.10423292273022257,
+        "mean_shap_FP": 0.040169105486169095,
+        "mean_shap_FN": 0.02343706747485314,
+        "mean_shap_TN": -0.017151224448667984,
+        "median_value_TP": 3.864091379358555,
+        "median_value_FP": 3.4722222222222223,
+        "median_value_FN": 3.4175824175824174,
+        "median_value_TN": 2.743356242840779
+      }
+    ],
+    "group_profile": [
+      {
+        "group": "Volume & patient concentration",
+        "TP": 2.351872897707919,
+        "FP": 0.9919083548503141,
+        "FN": 0.6665744207713515,
+        "TN": -0.28522106211962944
+      },
+      {
+        "group": "Claim amounts",
+        "TP": 2.2533284551621695,
+        "FP": 1.9474210655365336,
+        "FN": 0.9612594852293737,
+        "TN": -0.36391462103514594
+      },
+      {
+        "group": "Care setting & stay length",
+        "TP": 0.6159883709286851,
+        "FP": 0.6396386575661173,
+        "FN": 0.45001616442727416,
+        "TN": -0.2064955049129483
+      },
+      {
+        "group": "Coding patterns",
+        "TP": 0.7771767903225905,
+        "FP": 0.5655195510169977,
+        "FN": 0.05451382559211801,
+        "TN": -0.11908163568121355
+      },
+      {
+        "group": "Physician network",
+        "TP": 0.3827811253670457,
+        "FP": 0.3597966995237706,
+        "FN": -0.07928332216813842,
+        "TN": -0.029469248759813754
+      },
+      {
+        "group": "Beneficiary profile",
+        "TP": 0.06737873068391131,
+        "FP": 0.18413251594111685,
+        "FN": 0.0575852685440995,
+        "TN": -0.008522362651977625
+      },
+      {
+        "group": "Benford's Law",
+        "TP": 0.19335704263724415,
+        "FP": 0.1708512282717011,
+        "FN": -6.678685607749239e-05,
+        "TN": -0.04930650790236105
+      },
+      {
+        "group": "(base value)",
+        "TP": -5.689426812007097,
+        "FP": -5.689426812007097,
+        "FN": -5.689426812007097,
+        "TN": -5.689426812007097
+      },
+      {
+        "group": "(mean log-odds score)",
+        "TP": 0.9524566008024716,
+        "FP": -0.8301587393005435,
+        "FN": -3.5788277564670943,
+        "TN": -6.751437755070184
+      }
+    ],
+    "flagged_top_driver": [
+      {
+        "feature": "MaxClaimAmt",
+        "TP": 51,
+        "FP": 61,
+        "total": 112
+      },
+      {
+        "feature": "NumClaims",
+        "TP": 29,
+        "FP": 15,
+        "total": 44
+      },
+      {
+        "feature": "AvgLengthOfStayDays",
+        "TP": 3,
+        "FP": 10,
+        "total": 13
+      },
+      {
+        "feature": "AvgClaimsPerBeneficiary",
+        "TP": 3,
+        "FP": 4,
+        "total": 7
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "TP": 0,
+        "FP": 1,
+        "total": 1
+      }
+    ]
+  },
+  "fragility": {
+    "table": [
+      {
+        "outcome": "TP",
+        "n": 86,
+        "near_threshold": 5,
+        "single_feature_decision": 28,
+        "median_distance_logodds": 3.399697974078657,
+        "single_feature_pct": 32.55813953488372
+      },
+      {
+        "outcome": "FP",
+        "n": 91,
+        "near_threshold": 19,
+        "single_feature_decision": 58,
+        "median_distance_logodds": 1.1896412139585275,
+        "single_feature_pct": 63.73626373626374
+      },
+      {
+        "outcome": "FN",
+        "n": 15,
+        "near_threshold": 3,
+        "single_feature_decision": 3,
+        "median_distance_logodds": 1.0536322640143516,
+        "single_feature_pct": 20.0
+      },
+      {
+        "outcome": "TN",
+        "n": 890,
+        "near_threshold": 19,
+        "single_feature_decision": 17,
+        "median_distance_logodds": 4.776524357524496,
+        "single_feature_pct": 1.9101123595505618
+      }
+    ],
+    "deciding_features": {
+      "MaxClaimAmt": 47,
+      "NumClaims": 30,
+      "AvgClaimsPerBeneficiary": 12,
+      "AvgLengthOfStayDays": 10,
+      "TopProcedureCodeShare": 2,
+      "MedianClaimAmt": 2,
+      "AvgNumPhysiciansInvolved": 1,
+      "TopDiagnosisCodeShare": 1,
+      "AvgPhysicianProviderSpread": 1
+    },
+    "n_near": 46,
+    "near_band_scores": [
+      0.05405651872061235,
+      0.1344523368117063
+    ],
+    "near_importance": [
+      {
+        "feature": "MaxClaimAmt",
+        "mean_abs_shap_near": 1.0576050455037111,
+        "rank_near": 1,
+        "rank_all": 1
+      },
+      {
+        "feature": "NumClaims",
+        "mean_abs_shap_near": 0.8684820992253783,
+        "rank_near": 2,
+        "rank_all": 2
+      },
+      {
+        "feature": "AvgClaimsPerBeneficiary",
+        "mean_abs_shap_near": 0.5750660311949821,
+        "rank_near": 3,
+        "rank_all": 3
+      },
+      {
+        "feature": "AvgLengthOfStayDays",
+        "mean_abs_shap_near": 0.5615264402082625,
+        "rank_near": 4,
+        "rank_all": 4
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "mean_abs_shap_near": 0.3421931803016493,
+        "rank_near": 5,
+        "rank_all": 8
+      },
+      {
+        "feature": "BenfordMAD",
+        "mean_abs_shap_near": 0.27477152404789135,
+        "rank_near": 6,
+        "rank_all": 5
+      },
+      {
+        "feature": "MedianClaimAmt",
+        "mean_abs_shap_near": 0.2702203286476551,
+        "rank_near": 7,
+        "rank_all": 6
+      },
+      {
+        "feature": "StdClaimAmt",
+        "mean_abs_shap_near": 0.23076041277971826,
+        "rank_near": 8,
+        "rank_all": 18
+      },
+      {
+        "feature": "AvgNumDiagnosisCodes",
+        "mean_abs_shap_near": 0.20284700569956468,
+        "rank_near": 9,
+        "rank_all": 12
+      },
+      {
+        "feature": "AvgClaimAmt",
+        "mean_abs_shap_near": 0.20254365255291198,
+        "rank_near": 10,
+        "rank_all": 10
+      }
+    ]
+  },
+  "cases": [
+    {
+      "case": "Highest-scoring true positive",
+      "Provider": "PRV52340",
+      "outcome": "TP",
+      "score": 0.9871934024982345,
+      "logodds_minus_threshold": 6.707058182250967,
+      "top_drivers": "NumClaims=1743 (+4.24); MaxClaimAmt=5.7e+04 (+1.57); AvgClaimsPerBeneficiary=2.515 (+1.00); NumUniqueOperatingPhysicians=39 (+0.57); TopProcedureCodeShare=0.0531 (+0.52)"
+    },
+    {
+      "case": "True positive closest above the threshold",
+      "Provider": "PRV53951",
+      "outcome": "TP",
+      "score": 0.08743216551690539,
+      "logodds_minus_threshold": 0.01675349974195539,
+      "top_drivers": "MaxClaimAmt=6.3e+04 (+2.42); TopProcedureCodeShare=0.1 (+0.64); StdClaimAmt=9595 (+0.43); AvgLengthOfStayDays=4.136 (-0.40); AvgNumPhysiciansInvolved=1.704 (-0.35)"
+    },
+    {
+      "case": "Highest-scoring false positive",
+      "Provider": "PRV57715",
+      "outcome": "FP",
+      "score": 0.9420673716502176,
+      "logodds_minus_threshold": 5.150948716733939,
+      "top_drivers": "NumClaims=860 (+2.29); MaxClaimAmt=5.7e+04 (+2.22); AvgClaimsPerBeneficiary=2.222 (+1.10); NumUniqueOperatingPhysicians=50 (+0.90); TopProcedureCodeShare=0.07143 (+0.76)"
+    },
+    {
+      "case": "False negative closest below the threshold",
+      "Provider": "PRV51482",
+      "outcome": "FN",
+      "score": 0.07713973416270699,
+      "logodds_minus_threshold": -0.1197066450127231,
+      "top_drivers": "MaxClaimAmt=9.9e+04 (+2.23); StdClaimAmt=1.079e+04 (+0.52); AvgClaimsPerBeneficiary=1.011 (-0.50); TopProcedureCodeShare=0.5 (-0.49); AvgLengthOfStayDays=6.273 (+0.46)"
+    },
+    {
+      "case": "Lowest-scoring false negative",
+      "Provider": "PRV52826",
+      "outcome": "FN",
+      "score": 0.0029310973621510567,
+      "logodds_minus_threshold": -3.4672903181691126,
+      "top_drivers": "AvgClaimsPerBeneficiary=2.835 (+1.66); NumClaims=292 (+1.10); MaxClaimAmt=3300 (-0.58); AvgNumDiagnosisCodes=2.702 (-0.34); PropDeceasedBeneficiaries=0 (-0.27)"
+    }
+  ],
+  "robustness": {
+    "background_size": 200,
+    "interventional_base": -5.894817356782313,
+    "interventional_additivity_gap": 2.2757679696283617e-07,
+    "spearman_global": 0.9609722697706264,
+    "topk_overlap": 9,
+    "same_top_driver_share": 0.7828096118299446,
+    "median_row_spearman": 0.970558028072578,
+    "table": [
+      {
+        "feature": "MaxClaimAmt",
+        "path_dependent": 0.7429769344235391,
+        "interventional": 0.5950446853042045,
+        "rank_path": 1,
+        "rank_interventional": 2
+      },
+      {
+        "feature": "NumClaims",
+        "path_dependent": 0.582058769630631,
+        "interventional": 0.6058977079374083,
+        "rank_path": 2,
+        "rank_interventional": 1
+      },
+      {
+        "feature": "AvgClaimsPerBeneficiary",
+        "path_dependent": 0.45639087658611716,
+        "interventional": 0.4713932209750042,
+        "rank_path": 3,
+        "rank_interventional": 3
+      },
+      {
+        "feature": "AvgLengthOfStayDays",
+        "path_dependent": 0.35504287619632496,
+        "interventional": 0.3539540412163027,
+        "rank_path": 4,
+        "rank_interventional": 4
+      },
+      {
+        "feature": "BenfordMAD",
+        "path_dependent": 0.2540587167791411,
+        "interventional": 0.2787680968718108,
+        "rank_path": 5,
+        "rank_interventional": 5
+      },
+      {
+        "feature": "MedianClaimAmt",
+        "path_dependent": 0.24015439799318009,
+        "interventional": 0.2432524690011152,
+        "rank_path": 6,
+        "rank_interventional": 6
+      },
+      {
+        "feature": "PropDeceasedBeneficiaries",
+        "path_dependent": 0.20719960006166346,
+        "interventional": 0.22863598114618472,
+        "rank_path": 7,
+        "rank_interventional": 7
+      },
+      {
+        "feature": "TopProcedureCodeShare",
+        "path_dependent": 0.19598663854947065,
+        "interventional": 0.1603976122623538,
+        "rank_path": 8,
+        "rank_interventional": 10
+      },
+      {
+        "feature": "DeductibleToReimbursementRatio",
+        "path_dependent": 0.17044918154114688,
+        "interventional": 0.15296213202852832,
+        "rank_path": 9,
+        "rank_interventional": 15
+      },
+      {
+        "feature": "AvgClaimAmt",
+        "path_dependent": 0.15848477432358815,
+        "interventional": 0.1970808462246232,
+        "rank_path": 10,
+        "rank_interventional": 8
+      },
+      {
+        "feature": "TopDiagnosisCodeShare",
+        "path_dependent": 0.15808798453038386,
+        "interventional": 0.1585557444011062,
+        "rank_path": 11,
+        "rank_interventional": 11
+      },
+      {
+        "feature": "AvgNumDiagnosisCodes",
+        "path_dependent": 0.15759955124317954,
+        "interventional": 0.16579537120160973,
+        "rank_path": 12,
+        "rank_interventional": 9
+      },
+      {
+        "feature": "TopBeneficiaryClaimShare",
+        "path_dependent": 0.1491858831707967,
+        "interventional": 0.13670139791093955,
+        "rank_path": 13,
+        "rank_interventional": 17
+      },
+      {
+        "feature": "AvgNumPhysiciansInvolved",
+        "path_dependent": 0.14140688311257812,
+        "interventional": 0.15597300188573188,
+        "rank_path": 14,
+        "rank_interventional": 13
+      },
+      {
+        "feature": "AvgClaimDurationDays",
+        "path_dependent": 0.13911918312792504,
+        "interventional": 0.15367665910682535,
+        "rank_path": 15,
+        "rank_interventional": 14
+      },
+      {
+        "feature": "NumUniqueOperatingPhysicians",
+        "path_dependent": 0.13777658552851413,
+        "interventional": 0.15237943035576137,
+        "rank_path": 16,
+        "rank_interventional": 16
+      },
+      {
+        "feature": "AvgAgeOfBeneficiaries",
+        "path_dependent": 0.13096937897927083,
+        "interventional": 0.12764516374084375,
+        "rank_path": 17,
+        "rank_interventional": 18
+      },
+      {
+        "feature": "StdClaimAmt",
+        "path_dependent": 0.12958552084421915,
+        "interventional": 0.15670369561875858,
+        "rank_path": 18,
+        "rank_interventional": 12
+      },
+      {
+        "feature": "AvgChronicConditions",
+        "path_dependent": 0.123234023005265,
+        "interventional": 0.1254010536644535,
+        "rank_path": 19,
+        "rank_interventional": 20
+      },
+      {
+        "feature": "AvgPhysicianProviderSpread",
+        "path_dependent": 0.12280926420314946,
+        "interventional": 0.12756189881692065,
+        "rank_path": 20,
+        "rank_interventional": 19
+      },
+      {
+        "feature": "PropInpatient",
+        "path_dependent": 0.08433393403494988,
+        "interventional": 0.09038191940099398,
+        "rank_path": 21,
+        "rank_interventional": 22
+      },
+      {
+        "feature": "AvgNumProcedureCodes",
+        "path_dependent": 0.08417776946670849,
+        "interventional": 0.09922367956343284,
+        "rank_path": 22,
+        "rank_interventional": 21
+      },
+      {
+        "feature": "NumUniqueAttendingPhysicians",
+        "path_dependent": 0.0635810329506593,
+        "interventional": 0.06687515722180772,
+        "rank_path": 23,
+        "rank_interventional": 23
+      },
+      {
+        "feature": "TopDiagnosisCodeShareMissing",
+        "path_dependent": 0.0,
+        "interventional": 0.0,
+        "rank_path": 24,
+        "rank_interventional": 24
+      },
+      {
+        "feature": "TopProcedureCodeShareMissing",
+        "path_dependent": 0.0,
+        "interventional": 0.0,
+        "rank_path": 25,
+        "rank_interventional": 25
+      },
+      {
+        "feature": "BenfordMADMissing",
+        "path_dependent": 0.0,
+        "interventional": 0.0,
+        "rank_path": 26,
+        "rank_interventional": 26
+      }
+    ]
+  },
+  "run": {
+    "selected_run": "artifacts/boosting/20261011_232303_full",
+    "versions": {
+      "python": "3.10.11",
+      "lightgbm": "4.6.0",
+      "shap": "0.49.1",
+      "sklearn": "1.6.1",
+      "pandas": "2.3.3",
+      "numpy": "2.0.2",
+      "matplotlib": "3.9.4"
+    },
+    "seed": 4012,
+    "n_boot": 1000,
+    "near_band_logodds": 0.5,
+    "generated_at": "2026-10-25T23:36:08.726081+08:00"
+  }
+}
