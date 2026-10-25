@@ -1,0 +1,5 @@
+# Dashboard extras, on top of the project's requirements.txt
+# (which already provides pandas, numpy, scikit-learn, imbalanced-learn, lightgbm, joblib).
+# Pin the exact versions you tested: see "Pin the versions you tested" in dashboard/README.md.
+streamlit>=1.35,<2
+pytest>=7

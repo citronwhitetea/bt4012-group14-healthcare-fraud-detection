@@ -1,0 +1,130 @@
+{
+  "run_id": "20261011_232303_full",
+  "quick_run": false,
+  "model": "lgbm",
+  "strategy": "original",
+  "config_id": 13,
+  "params": {
+    "colsample_bytree": 0.9953633521964644,
+    "learning_rate": 0.02046095510121513,
+    "min_child_samples": 45,
+    "n_estimators": 384,
+    "num_leaves": 60,
+    "reg_lambda": 0.10944878132448735,
+    "subsample": 0.7052879736397115,
+    "subsample_freq": 1
+  },
+  "threshold": 0.08610464772643815,
+  "threshold_rule": {
+    "rule": "min_recall",
+    "value": 0.8
+  },
+  "threshold_rationale": "Pei confirmed team agreement in this chat on 24 October 2026, before final held-out evaluation. Use the existing joint mean-CV-AP selection policy: candidates within one standard error of the highest mean AP qualify; prefer original, then class_weight, then smote, then higher mean AP. The operational objective is at least 80% recall on development OOF predictions. Among thresholds meeting this objective, choose the highest precision. This prioritises identifying potentially fraudulent providers while accepting the observed validation review workload of 701/4328 providers. This is a project assumption, not an empirically established business cost optimum or a guarantee of 80% recall on unseen data.",
+  "selection_rule": {
+    "tolerance_se": 1.0,
+    "strategy_preference": [
+      "original",
+      "class_weight",
+      "smote"
+    ],
+    "best_ap_mean": 0.6740493992962564,
+    "cutoff": 0.6626663663954424,
+    "tied_candidates": [
+      "lgbm/original",
+      "xgb/original",
+      "lgbm/class_weight",
+      "xgb/class_weight"
+    ]
+  },
+  "oof_metrics": {
+    "threshold": 0.08610464772643815,
+    "ap": 0.671978933464591,
+    "roc_auc": 0.9352681086218346,
+    "precision": 0.46219686162624823,
+    "recall": 0.8,
+    "f1": 0.5858951175406871,
+    "flagged_share": 0.16196857670979667,
+    "tn": 3546,
+    "fp": 377,
+    "fn": 81,
+    "tp": 324
+  },
+  "cv_ap_mean": 0.6739574162132673,
+  "cv_ap_std": 0.025790658617351886,
+  "cv_roc_auc_mean": 0.9352297382741727,
+  "cv_roc_auc_std": 0.012078942754346008,
+  "oof_brier": 0.04982232496689197,
+  "oof_brier_prior_reference": 0.0848201091803021,
+  "feature_set": "full_features",
+  "feature_order": [
+    "NumClaims",
+    "PropInpatient",
+    "AvgClaimAmt",
+    "MedianClaimAmt",
+    "StdClaimAmt",
+    "MaxClaimAmt",
+    "DeductibleToReimbursementRatio",
+    "AvgNumDiagnosisCodes",
+    "AvgNumProcedureCodes",
+    "AvgNumPhysiciansInvolved",
+    "NumUniqueAttendingPhysicians",
+    "NumUniqueOperatingPhysicians",
+    "AvgAgeOfBeneficiaries",
+    "PropDeceasedBeneficiaries",
+    "AvgChronicConditions",
+    "AvgClaimsPerBeneficiary",
+    "AvgClaimDurationDays",
+    "AvgLengthOfStayDays",
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "AvgPhysicianProviderSpread",
+    "TopBeneficiaryClaimShare",
+    "BenfordMAD",
+    "BenfordMADMissing"
+  ],
+  "binary_features": [
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "BenfordMADMissing"
+  ],
+  "restore_na_cols": [
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "BenfordMAD"
+  ],
+  "id_col": "Provider",
+  "target": "PotentialFraud",
+  "train_path": "../data/processed/provider_features_train.csv",
+  "test_path": "../data/processed/provider_features_test.csv",
+  "n_train": 4328,
+  "n_train_fraud": 405,
+  "train_fraud_rate": 0.09357670979667283,
+  "seed": 4012,
+  "n_folds": 5,
+  "n_iter": 20,
+  "n_jobs": 4,
+  "strategies": [
+    "original",
+    "class_weight",
+    "smote"
+  ],
+  "fingerprints_sha256": {
+    "train": "95adbab49acf3e4068ae33a710e25d7f5f758b97e3081f68fbd535fcf5231d43",
+    "test": "e63815a67fce1c85c71cd5951390c621961769747804a732ea8c0409fec1402b",
+    "feature_sets": "9ea2ed8cbb2be0b82216ab8d453e9c79ec0eca354d13d45b021d407105f33faf",
+    "folds": "257e07580d0bd7c2be6ce699e96fa414bd974d87b1e6c8484453a7e4932f1cfc",
+    "pipeline": "65316d155c638b96ef14e8a32e51f7d546b8458b863df2a1a7e1c67e52dce6c9"
+  },
+  "versions": {
+    "python": "3.11.14",
+    "pandas": "2.3.3",
+    "numpy": "2.0.2",
+    "sklearn": "1.6.1",
+    "imblearn": "0.12.4",
+    "xgboost": "2.1.4",
+    "lightgbm": "4.6.0"
+  },
+  "final_selection_record": "artifacts/shared/final_model_selection.json"
+}

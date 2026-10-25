@@ -1,0 +1,20 @@
+{
+  "description": "Post-evaluation evidence snapshot; original evaluation outputs are copied byte-for-byte.",
+  "captured_on": "2026-10-24",
+  "selected_run": "artifacts/boosting/20261011_232303_full",
+  "snapshot_sha256": {
+    "selected_metadata.json": "be413f87dfe312aabb52dbe6cefaaf3edcf68fd6279d71e4c102bd1a05e08300",
+    "test_metrics.json": "5b7f0c2cce10ef56b2ed46caaa5f07f79ae299756867b0652b4c07b9cdd72027",
+    "test_predictions.csv": "4c9a41f7cd3a04df63f26543728f431a3ba721f1ba4ccd57bf0e9c2e6bf0f6d2"
+  },
+  "original_execution_helper_sha256": "1aec76b50f354f41778162de4cabe7919811d05271c3c9b416c56345b605249e",
+  "executed_section11_sha256": "66157969456b53e4fab8baefd311f3e932dbc531d83bc3c3059337ba066c3bae",
+  "observed_original_file_mtimes": {
+    "artifacts/shared/final_model_selection.json": "2026-10-24T15:03:19.390704+08:00",
+    "artifacts/boosting/20261011_232303_full/selected_metadata.json": "2026-10-24T15:03:19.391110+08:00",
+    "artifacts/boosting/20261011_232303_full/test_predictions.csv": "2026-10-24T15:03:23.984827+08:00",
+    "artifacts/boosting/20261011_232303_full/test_metrics.json": "2026-10-24T15:03:23.985541+08:00",
+    "artifacts/shared/heldout_evaluation.json": "2026-10-24T15:03:23.986721+08:00"
+  },
+  "timing_caveat": "Filesystem times alone are not immutable proof; the archived helper also records the write-before-evaluate control flow."
+}
