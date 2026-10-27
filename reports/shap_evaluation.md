@@ -1,6 +1,6 @@
 # SHAP evaluation of the frozen final model
 
-Notebook: `notebooks/07_shap_evaluation.ipynb`. Outputs: `reports/shap_evaluation/` (tables, `figures/`, `summary.json`).
+Notebook: `notebooks/07_shap_evaluation.ipynb` (section 9 holds the Benford follow-up). Outputs: `reports/shap_evaluation/` (tables, `figures/`, `summary.json`).
 
 **Model explained:** 06b LightGBM, original class balance, run `20261011_232303_full`. The full pipeline is median `SimpleImputer` → `LGBMClassifier`, with the frozen review threshold **0.0861** (log-odds −2.36).
 **Providers explained:** the 1,082 held-out test providers (101 fraud-labelled; 177 flagged: TP 86, FP 91, FN 15, TN 890).
@@ -31,7 +31,7 @@ Notebook: `notebooks/07_shap_evaluation.ipynb`. Outputs: `reports/shap_evaluatio
 | 10 | AvgClaimAmt | 0.159 | 3.2% | higher → higher risk |
 
 - **Concentration.** The top three features carry 36% of total mean |SHAP|; the top ten carry 68%.
-- **Stable leaders.** In 1,000 label-stratified bootstraps of the test providers, the top four ranks never change. BenfordMAD and MedianClaimAmt share ranks 5–6. Below rank 9, neighbouring ranks overlap, so their order should not be over-read.
+- **Stable leaders.** In 1,000 label-stratified bootstraps of the test providers, the top four ranks never change. BenfordMAD and MedianClaimAmt share ranks 5–6. From rank 7 onward, neighbouring ranks overlap, so their order should not be over-read.
 - **Feature groups.** Exact sums within domain groups put **claim amounts** at 30% of attribution and **volume and patient concentration** at 25%. The other groups are care setting and stay length (12%), coding patterns (10%), physician network (8%), beneficiary profile (8%) and Benford's Law (7%).
 - **Monotone effects.** Dependence plots show near-monotone, plausible effects for the top four. The push from MaxClaimAmt turns positive at about $14,000 and reaches +2 log-odds above $44,000. NumClaims turns positive above about 75 claims and rises steeply above about 260.
 - **Agreement with gain importance.** The ranking agrees moderately with LightGBM's gain importance: Spearman 0.70, and 6 of the top 10 in common. The main disagreements are MedianClaimAmt (SHAP 6 vs gain 23), PropDeceasedBeneficiaries (7 vs 17), TopProcedureCodeShare (8 vs 3) and AvgAgeOfBeneficiaries (17 vs 6). Gain measures training-loss reduction; SHAP measures effect on held-out scores. They are not interchangeable.
@@ -50,15 +50,51 @@ So "missing" reaches the model only through the **imputed training median** and 
 
 These pushes happen to point the right way, but they come from where the median lies, not from a learned "missing" effect. A different fill value would change these explanations.
 
-### 4. The Benford signal is confounded with claim volume
-BenfordMAD ranks 5th, but its effect is **U-shaped**:
-- **Very conforming providers** (MAD ≤ 0.023) get a mean push of +0.45. Their fraud rate is 31%, and their median is 280 claims.
-- **Strongly deviating providers** (MAD ≥ 0.048) also get +0.48. Their fraud rate is 6.8%, and their median is 30 claims.
+### 4. Benford's Law: a tested method with a qualified result
+**Team decision (27 October 2026).** The report presents the per-provider Benford feature as a method we built and tested, whose result is qualified: *SHAP and a size- and case-mix-adjusted check show that `BenfordMAD` mostly proxies claim volume, with at most a weak signal in the expected direction.* It is not presented as a working detector of manipulated amounts. The supporting checks are in section 9 of the notebook (figures `09_benford_claim_digits` and `10_benford_size_adjusted`).
 
-MAD falls as the number of claims grows (Spearman −0.77 with NumClaims on the test providers). The "low MAD → risk" arm therefore largely re-encodes high volume, and the "high MAD" arm mostly picks up small, noisy providers. **The Benford feature should not be presented as evidence of digit manipulation.** A sample-size-adjusted Benford statistic would be needed to test that claim (see Limitations).
+**What SHAP shows.** BenfordMAD ranks 5th (5.1% of attribution), but its effect is **U-shaped**. Both ends of the curve are pushed up, and the providers at each end differ mainly in size:
+
+| Test providers by BenfordMAD | Providers | Fraud rate | Median claims | Mean SHAP |
+|---|---:|---:|---:|---:|
+| Q1, most conforming (0.008–0.023) | 134 | 31% | 280 | +0.45 |
+| Q2 (0.023–0.030) | 133 | 16% | 133 | −0.01 |
+| Q3 (0.030–0.038) | 133 | 14% | 80 | −0.16 |
+| Q4 (0.038–0.048) | 133 | 4.5% | 42 | −0.01 |
+| Q5, least conforming (0.048–0.100) | 133 | 6.8% | 30 | +0.48 |
+| Missing (fewer than 20 claims) | 416 | 1.2% | 7 | −0.27 |
+
+The feature is never the largest push for a flagged provider, and it never decides a flag on its own (section 7). Its practical effect on decisions is small; the issue is what it can be said to mean.
+
+**Why: three checks.**
+1. **The claim amounts do not follow Benford's Law to begin with.** Across all 558,211 claims, the first-digit MAD is 0.018, which is in Nigrini's "nonconformity" range (above 0.015). Inpatient is 0.028 and outpatient 0.018. For example, 23.8% of amounts start with 1, against 30.1% expected. The amounts behave like a rate schedule, not naturally varying numbers:
+   - 47% of amounts are multiples of $100, and 99% of inpatient amounts are whole thousands;
+   - there are only 437 distinct amounts, and 10 of them cover 66% of claims;
+   - inpatient amounts span under two orders of magnitude.
+
+   Notebook 03a found almost the same deviation for fraud and non-fraud claims, so the mismatch is a property of the data.
+2. **The feature tracks claim count.**
+   - Recomputing BenfordMAD from the claims table reproduces the feature exactly. "Missing" is exactly "fewer than 20 claims".
+   - Even perfectly Benford-conforming data has a MAD that shrinks with sample size: about 0.05 at 20 claims and about 0.01 at 500. Accordingly, BenfordMAD falls as claim count rises (Spearman −0.76 on development providers, −0.77 on test).
+   - Fraud-labelled providers are larger, so they look *more* conforming.
+3. **Once size and case mix are accounted for, the difference all but disappears.** For the 2,654 development providers with a value (375 fraud-labelled), each provider's deviation is compared with what chance would produce at its claim count:
+
+| Measure | Cohen's d, fraud − other (95% CI) | Spearman with claim count |
+|---|---|---:|
+| BenfordMAD, as used by the model | −0.47 (−0.57 to −0.38) | −0.76 |
+| Deviation ÷ chance, perfect-Benford baseline | +0.93 (+0.79 to +1.08) | +0.50 |
+| Deviation ÷ chance, dataset's own digit pattern for the provider's inpatient/outpatient mix | **+0.07 (−0.04 to +0.18)** | −0.01 |
+
+   - **Raw feature:** fraud providers seem to conform more, because they are bigger.
+   - **Against perfect Benford:** they seem to deviate more, because large and inpatient-heavy providers bill from a rate schedule whose digits differ from Benford's.
+   - **Against the dataset's own pattern for the same claim mix and sample size:** fraud-labelled providers are almost indistinguishable. The interval includes zero, and within every claim-count quintile *d* is between +0.03 and +0.13.
+
+   So any genuine digit signal is weak at best, though it does point in the expected direction (fraud deviates slightly more).
+
+**Consequence for earlier write-ups.** The EDA statement that per-provider Benford reveals "a modest but real difference … aggregating had masked it" (d = −0.54; 04b and the `build_benford_features` docstring in `src/features.py`) is explained by claim volume. The final report should not repeat it as a fraud signal.
 
 ### 5. PropDeceasedBeneficiaries looks weakly supported
-It ranks 7th by SHAP, but its mean push is about zero in both classes (+0.004 fraud vs −0.004 non-fraud). Its largest pushes go to providers with 2–5% deceased beneficiaries (mean +0.75), whose fraud rate is only 7%. By contrast, the 0–2% band has a 29% fraud rate but a mean push of only +0.08. These are marginal comparisons and SHAP is conditional on the other features, but this is the feature most likely to be moving scores without discriminating. It is a candidate for review in any retraining.
+It ranks 7th by SHAP, but its mean push is about zero in both classes (+0.004 fraud vs −0.004 non-fraud). Its largest pushes go to providers with 2–5% deceased beneficiaries (mean +0.75), whose fraud rate is only 7%. By contrast, the band above 0% and up to 2% has a 29% fraud rate but a mean push of only +0.08. These are marginal comparisons and SHAP is conditional on the other features, but this is the feature most likely to be moving scores without discriminating. It is a candidate for review in any retraining.
 
 ### 6. Domain and network features play a small role
 `AvgPhysicianProviderSpread`, the physician–provider network feature, ranks 20th (2.5%). The physician-network group as a whole has 8%. The relational features add some signal, but the model rests mainly on amounts and volume.
@@ -72,7 +108,7 @@ SHAP interaction values put the summed mean |pairwise interaction| (5.15) close 
 - In the mean SHAP profile, MaxClaimAmt pushes FPs almost as much as TPs (+1.35 vs +1.61), while NumClaims pushes them much less (+0.60 vs +1.76).
 - **MaxClaimAmt is the largest positive driver for 61 of the 91 FPs (67%)**, against 51 of 86 TPs.
 
-The maximum claim amount is capped at $57,000 for 58 test providers. Of the 76 providers at or above that value, 83% are flagged and 55% are fraud-labelled.
+58 test providers share exactly $57,000 as their maximum claim, which may be a ceiling in the data. Of the 76 providers at or above that value, 83% are flagged and 55% are fraud-labelled.
 
 **Many flags rest on a single feature.** For 58 of 91 FPs (64%) and 28 of 86 TPs (33%), one contribution is larger than the provider's distance above the threshold. MaxClaimAmt is that feature in 47 cases and NumClaims in 30. This is an additive-attribution statement, not a counterfactual. It still means a reviewer should expect many flags whose explanation comes down to "one very large claim".
 
@@ -103,9 +139,10 @@ The maximum claim amount is capped at $57,000 for 58 test providers. Of the 76 p
 
 - **For the dashboard.** "Why it scored here" uses these same values. Reviewers should expect MaxClaimAmt or NumClaims as the top factor for most flags (156 of 177). A single very large claim is often enough to cross the threshold, so the case review should check whether a large claim is clinically plausible rather than treat it as the finding.
 - **For the report.** The model behaves as a "large, high-volume, inpatient-heavy provider" detector with sensible directions. That is consistent with the EDA, but it explains why its false positives are large legitimate providers and its misses are small ones.
+- **For the Benford method.** Present it as a tested method with a qualified result (finding 4): it was built and evaluated, and SHAP and the adjusted checks show it mainly measures provider size. This is a legitimate negative finding, not a working fraud detector.
 - **For any future retraining** (out of scope for this frozen evaluation):
   - drop or replace the unused missing-value flags;
-  - test a size-adjusted Benford statistic;
+  - either drop `BenfordMAD` or replace it with a deviation measured against the dataset's own digit pattern for the provider's claim mix and claim count (section 9). On this data, it adds little beyond provider size;
   - re-examine PropDeceasedBeneficiaries;
   - consider whether features normalised by provider size would reduce the volume dependence.
 
@@ -116,4 +153,5 @@ The maximum claim amount is capped at $57,000 for 58 test providers. Of the 76 p
 - **Path-dependent SHAP** credits features through the training distribution stored in the trees. The interventional comparison bounds this effect but does not remove it.
 - **Small subgroups.** All statistics come from one held-out set of 1,082 providers. Outcome subgroups are small (FN n = 15), and the bootstrap covers test-sample variation only, not retraining.
 - **Imputation.** For providers with missing values, explanations depend on the training-median fill. The model never uses the missing-value flags.
+- **Benford checks.** These use first digits only. The case-mix baseline is the pooled first-digit pattern of all claims by claim type, which includes test providers' claims but no labels. The adjusted comparison uses development labels and is descriptive; it does not change the frozen model.
 - **Upstream limitations carry over** from `reports/final_model_evaluation.md`. They include full-dataset feature development and the physician-network feature, which is computed across the whole claims table.
