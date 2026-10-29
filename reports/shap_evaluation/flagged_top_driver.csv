@@ -1,0 +1,6 @@
+top_positive_driver,TP,FP,total
+MaxClaimAmt,51,61,112
+NumClaims,29,15,44
+AvgLengthOfStayDays,3,10,13
+AvgClaimsPerBeneficiary,3,4,7
+TopProcedureCodeShare,0,1,1
