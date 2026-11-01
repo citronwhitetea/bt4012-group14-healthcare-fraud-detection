@@ -73,6 +73,32 @@ The shortlist and notes last for the browser session only and are separate from 
 - **Limitations:** six short cards.
 - **Run details:** the verification checks, package versions, model settings and selection rule.
 
+## Review policies
+
+The dashboard uses one frozen LightGBM model with two review policies. Only the threshold that decides who is flagged differs; scores and explanations are identical.
+
+| | Original policy | Higher-recall policy (recommended) |
+|---|---|---|
+| Validation recall target | 80% | 90% |
+| Threshold | from `selected_metadata.json` | from `artifacts/shared/exploratory_review_policy.json` |
+| Held-out test result | Original final evaluation | Supplementary evaluation (previously used test set) |
+
+**The queue opens on the recommended higher-recall policy** when its policy file is present, written and committed by notebook 06d. It groups providers into three bands:
+- **Review first:** also flagged under the original policy.
+- **Additional review:** flagged only under the higher-recall policy. These need real review, or the extra recall is not delivered.
+- **Not flagged:** not automatically cleared.
+
+The original policy stays one click away, labelled "Final evaluation". The summary, case panel, export and **This file** follow whichever policy is chosen.
+
+**Model and evidence:**
+- **Performance** keeps the original final evaluation (the outcome grid and measures). Below it, a separate table compares each policy's validation target with its observed test result, labels the evaluation status, breaks the additional reviews into positive- and negative-labelled providers, and shows the disclosure that the policy was motivated by the original result.
+- **Review thresholds** explains how both thresholds were set, with both marked on the workload curve.
+- **Review policies** records the recommendation, the bands, the decision and its rationale. It also compares recall targets on validation data, with increments both against the original and against the row above.
+
+**What-ifs** (for example a 95% target) appear only in that validation comparison. They are never applied to a queue, because a queue of held-out providers would make them test-informed rather than validation-only.
+
+**The policy is used only if it matches the frozen run:** the same run, model fingerprint, original threshold and validation predictions, and a threshold below the original one. Its supplementary evaluation must also have used the same threshold. Otherwise the app shows a warning and uses the original policy. What-ifs are offered only if the validation rule reproduces the frozen threshold exactly.
+
 ## Upload checks
 
 **Rejected**, with a downloadable list of each affected provider, column and value:

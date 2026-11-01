@@ -28,6 +28,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 NOTEBOOK_DIR = REPO_ROOT / "notebooks"
 ARTIFACTS_DIR = REPO_ROOT / "artifacts"
 SELECTION_PATH = ARTIFACTS_DIR / "shared" / "final_model_selection.json"
+POLICY_PATH = ARTIFACTS_DIR / "shared" / "exploratory_review_policy.json"
+POLICY_EVAL_PATH = ARTIFACTS_DIR / "shared" / "exploratory_policy_supplementary_evaluation.json"
 RUN_DIR_ENV = "FRAUD_DASHBOARD_RUN_DIR"
 RUN_ID_PATTERN = re.compile(r"\d{8}_\d{6}_(?:full|quick)")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -763,11 +765,120 @@ def workload_curve(bundle: ModelBundle, points: int = 200) -> pd.DataFrame | Non
     return pd.DataFrame(rows)
 
 
-def threshold_percentile(bundle: ModelBundle) -> float | None:
-    """Where the review threshold sits among training providers' out-of-fold scores (0-100)."""
+def threshold_percentile(bundle: ModelBundle, threshold: float | None = None) -> float | None:
+    """Where a threshold (default: the frozen one) sits among training providers' out-of-fold scores (0-100)."""
     if bundle.reference_scores is None:
         return None
-    return float(np.searchsorted(bundle.reference_scores, bundle.threshold, side="left") / len(bundle.reference_scores) * 100)
+    t = bundle.threshold if threshold is None else threshold
+    return float(np.searchsorted(bundle.reference_scores, t, side="left") / len(bundle.reference_scores) * 100)
+
+
+def validation_outcome(bundle: ModelBundle, threshold: float) -> dict | None:
+    """Caught / reviewed / recall / precision on training providers' out-of-fold scores at a threshold."""
+    if bundle.reference_scores is None or bundle.reference_labels is None:
+        return None
+    s, y = bundle.reference_scores, bundle.reference_labels
+    flagged = s >= threshold
+    tp, fp = int((flagged & (y == 1)).sum()), int((flagged & (y == 0)).sum())
+    return {"caught": tp, "missed": int((y == 1).sum()) - tp, "reviewed": tp + fp, "share_reviewed": (tp + fp) / len(s),
+            "recall": tp / max(int((y == 1).sum()), 1), "precision": tp / max(tp + fp, 1)}
+
+
+def recall_threshold(bundle: ModelBundle, target: float) -> float | None:
+    """Threshold for a recall target on validation (out-of-fold) scores, with the rule used in 06b and 06d:
+    the highest precision among thresholds whose recall is at least the target."""
+    if bundle.reference_scores is None or bundle.reference_labels is None:
+        return None
+    from sklearn.metrics import precision_recall_curve
+    prec, rec, thr = precision_recall_curve(bundle.reference_labels, bundle.reference_scores)
+    prec, rec = prec[:-1], rec[:-1]
+    ok = rec >= target
+    if not ok.any():
+        return None
+    return float(thr[int(np.argmax(np.where(ok, prec, -1)))])
+
+
+@dataclass
+class WhatIf:
+    """A recall target shown for discussion only: computed from validation scores, never committed or tested."""
+    target_recall: float
+    threshold: float
+
+    @property
+    def name(self) -> str:
+        return f"{self.target_recall:.0%} validation target (what-if, validation only)"
+
+
+def what_if_options(bundle: ModelBundle, targets=(0.90, 0.95), exclude: float | None = None) -> tuple[list[WhatIf], str | None]:
+    """Validation-only what-if thresholds. Offered only if the same rule reproduces the frozen threshold."""
+    if bundle.reference_scores is None:
+        return [], None
+    rule = bundle.meta.get("threshold_rule", {})
+    if rule.get("rule") != "min_recall":
+        return [], None
+    reproduced = recall_threshold(bundle, float(rule["value"]))
+    if reproduced is None or abs(reproduced - bundle.threshold) > 1e-12:
+        return [], ("What-if thresholds are unavailable: the validation predictions do not reproduce the frozen "
+                    "threshold with its recorded rule.")
+    out = []
+    for target in targets:
+        if exclude is not None and abs(target - exclude) < 1e-9:
+            continue
+        threshold = recall_threshold(bundle, target)
+        if threshold is not None and threshold < bundle.threshold:
+            out.append(WhatIf(target_recall=target, threshold=threshold))
+    return out, None
+
+
+# --------------------------------------------------------------------------------------
+# The exploratory review policy (notebook 06d), kept separate from the frozen final model
+# --------------------------------------------------------------------------------------
+@dataclass
+class ReviewPolicy:
+    threshold: float
+    target_recall: float
+    record: dict
+    evaluation: dict | None
+
+    @property
+    def name(self) -> str:
+        return f"Higher-recall policy \u2014 {self.target_recall:.0%} validation target"
+
+
+def load_policy(bundle: ModelBundle, path: Path = POLICY_PATH,
+                eval_path: Path = POLICY_EVAL_PATH) -> tuple[ReviewPolicy | None, str | None]:
+    """Return (policy, problem). The policy is used only if it matches the frozen run exactly."""
+    if not path.exists():
+        return None, None
+    try:
+        record = json.loads(path.read_text())
+        threshold, target = float(record["threshold"]), float(record["target_recall"])
+    except (OSError, ValueError, KeyError) as exc:
+        return None, f"The exploratory review policy file could not be read ({exc})."
+    problems = []
+    if record.get("pipeline_sha256") != bundle.meta.get("fingerprints_sha256", {}).get("pipeline"):
+        problems.append("it was committed for a different model file")
+    if record.get("run_id") != bundle.run_id:
+        problems.append("it names a different run")
+    if abs(float(record.get("original_threshold", -1)) - bundle.threshold) > 1e-12:
+        problems.append("its original threshold differs from the frozen one")
+    if not 0 < threshold < bundle.threshold:
+        problems.append("its threshold is not below the original one")
+    oof_path = bundle.run_dir / "oof_predictions.csv"
+    if oof_path.exists() and record.get("oof_predictions_sha256") not in (None, sha256(oof_path)):
+        problems.append("the validation predictions have changed since it was committed")
+    evaluation = None
+    if eval_path.exists():
+        try:
+            evaluation = json.loads(eval_path.read_text())
+        except (OSError, ValueError):
+            problems.append("its supplementary evaluation file could not be read")
+        else:
+            if abs(float(evaluation.get("threshold", -1)) - threshold) > 1e-12:
+                problems.append("its supplementary evaluation used a different threshold")
+    if problems:
+        return None, "The exploratory review policy was not loaded: " + "; ".join(problems) + "."
+    return ReviewPolicy(threshold=threshold, target_recall=target, record=record, evaluation=evaluation), None
 
 
 def common_raisers(batch: ScoredBatch, mask: np.ndarray, k: int = 3) -> pd.Series | None:
