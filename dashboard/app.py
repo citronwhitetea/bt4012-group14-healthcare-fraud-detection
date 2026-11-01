@@ -35,6 +35,8 @@ GRID = "#EDF0F4"       # chart gridlines
 FLAG = "#A65E0B"       # amber: flagged / raises the score
 FLAG_TINT = "#FBEFD9"
 FLAG_TEXT = "#7A4304"
+EXTRA = "#E2B36B"      # lighter amber: additional review under the exploratory policy
+EXTRA_TINT = "#FDF6EA"
 BLUE = "#2E5E8E"       # app colour: logo, tabs, buttons, progress bars
 BLUE_SOFT = "#8DAED0"
 PANEL = "#F3F7FB"
@@ -110,6 +112,13 @@ header[data-testid="stHeader"] {{ background: transparent; }}
   white-space: nowrap; margin-right: 0.35rem; }}
 .chip.flag {{ background: {FLAG_TINT}; color: {FLAG_TEXT}; }}
 .chip.calm {{ background: {CALM_TINT}; color: {CALM}; }}
+.chip.extra {{ background: {EXTRA_TINT}; color: {FLAG_TEXT}; box-shadow: inset 0 0 0 1px {EXTRA}; }}
+.chip.policy {{ background: #fff; color: {BLUE}; box-shadow: inset 0 0 0 1px {BLUE}; }}
+.chip.whatif {{ background: #fff; color: {MUTED}; border: 1px dashed {MUTED}; }}
+.chip.final {{ background: #fff; color: {INK}; box-shadow: inset 0 0 0 1px {RULE}; }}
+.triage .bar .extra {{ background: {EXTRA}; }}
+.position .threshold.secondary {{ background: {MUTED}; width: 1px; opacity: 0.7; }}
+.policy-note {{ font-size: 0.86rem; color: {BODY}; margin: 0.15rem 0 0.2rem; max-width: 60rem; line-height: 1.45; }}
 .chip.out {{ background: #fff; color: {MUTED}; box-shadow: inset 0 0 0 1px {RULE}; }}
 .chip.short {{ background: {BLUE}; color: #fff; }}
 
@@ -162,6 +171,7 @@ header[data-testid="stHeader"] {{ background: transparent; }}
 .outcome td span {{ font-size: 0.82rem; color: {MUTED}; }}
 .outcome td.caught {{ background: {FLAG_TINT}; }}
 .outcome td.caught b {{ color: {FLAG_TEXT}; }}
+.outcome td em {{ display: block; font-style: normal; font-size: 0.78rem; color: {MUTED}; margin-top: 0.15rem; }}
 
 @media (max-width: 900px) {{
   .block-container {{ padding: 1rem 1rem 2rem; }}
@@ -272,6 +282,16 @@ except core.DashboardError as exc:
         st.stop()
 
 thr_pct = core.threshold_percentile(bundle)
+policy, policy_problem = core.load_policy(bundle)
+what_ifs, what_if_problem = core.what_if_options(bundle, exclude=policy.target_recall if policy else None)
+_orig_target = bundle.meta.get("threshold_rule", {}).get("value")
+ORIGINAL_NAME = (f"Original policy \u2014 {_orig_target:.0%} validation target" if _orig_target
+                 else "Original policy")
+# The active review policy, chosen in the queue: "original", "policy" (committed, exploratory) or "whatif"
+exploratory = False            # True whenever a lower threshold than the original is active
+active_mode, active_name, active_target = "original", ORIGINAL_NAME, None
+EXTRA_LABEL = {"policy": "Additional review (higher-recall policy)"}
+active_threshold, active_pct = bundle.threshold, thr_pct
 n_train = bundle.meta.get("n_train") or 0
 meta, tm = bundle.meta, bundle.test_metrics
 
@@ -310,8 +330,13 @@ def sample_upload(source: bytes) -> bytes:
 _valign = {"vertical_alignment": "center"} if "vertical_alignment" in inspect.signature(st.columns).parameters else {}
 head_left, head_right = st.columns([4, 1.3], gap="large", **_valign)
 with head_left:
-    status_line = (f"{esc(bundle.model_name)} model, frozen {run_date(bundle.run_dir.name)} and tested once on "
-                   f"held-out providers. Review threshold {bundle.threshold:.3f}.")
+    if policy:
+        status_line = (f"{esc(bundle.model_name)} model, frozen {run_date(bundle.run_dir.name)}. Recommended review "
+                       f"threshold {policy.threshold:.4f} ({policy.target_recall:.0%} validation target); original "
+                       f"{bundle.threshold:.4f} (final evaluation).")
+    else:
+        status_line = (f"{esc(bundle.model_name)} model, frozen {run_date(bundle.run_dir.name)} and tested once on "
+                       f"held-out providers. Review threshold {bundle.threshold:.3f}.")
     if model_error:
         status_line += " The model is not loaded on this computer, so only the saved evaluation is shown."
     st.markdown(f'<div class="masthead">{LOGO}<div><h1>Provider risk review</h1><div class="context">'
@@ -413,7 +438,7 @@ if queue_state == "ok":
         queue_state = "errors"
 
 batch: core.ScoredBatch | None = result.get("batch")
-table: pd.DataFrame | None = result.get("table")
+table: pd.DataFrame | None = result["table"].copy() if result.get("table") is not None else None
 id_col = bundle.id_col
 if table is not None:
     n_total, n_flag = len(table), int(table["flagged"].sum())
@@ -451,23 +476,91 @@ def queue_unavailable() -> None:
              "set. The report lists each affected provider, column and value.", top=0.6)
 
 
+def apply_policy(choice: str) -> None:
+    """Set the active threshold and recompute flags and bands on this run's copy of the table."""
+    global exploratory, active_mode, active_name, active_target, active_threshold, active_pct, ranked, n_flag
+    chosen, active_mode = None, "original"
+    if policy is not None and choice == policy.name:
+        chosen, active_mode = policy, "policy"
+    for w in what_ifs:
+        if choice == w.name:
+            chosen, active_mode = w, "whatif"
+    exploratory = chosen is not None
+    active_name = chosen.name if chosen else ORIGINAL_NAME
+    active_target = chosen.target_recall if chosen else None
+    active_threshold = chosen.threshold if chosen else bundle.threshold
+    active_pct = core.threshold_percentile(bundle, active_threshold)
+    table["flagged"] = table["score"] >= active_threshold
+    if exploratory:
+        table["band"] = np.select([table["score"] >= bundle.threshold, table["flagged"]],
+                                  ["Review first", "Additional review"], default="Not flagged")
+    else:
+        table["band"] = np.where(table["flagged"], "Flagged", "Below")
+    ranked = table.sort_values("rank").reset_index(drop=True)
+    n_flag = int(table["flagged"].sum())
+
+
+def policy_picker() -> None:
+    if policy_problem:
+        st.warning(policy_problem + " The queue uses the original threshold.")
+    # What-ifs are deliberately not offered here: applied to a queue of held-out providers they would no longer be
+    # validation-only. They appear only in the validation comparison on the Review policies page.
+    if policy is None:
+        apply_policy(ORIGINAL_NAME)
+        return
+    st.markdown('<div class="sub-head" style="margin-top:0.8rem">Review policy</div>', unsafe_allow_html=True)
+    apply_policy(pick_one("Review policy", [policy.name, ORIGINAL_NAME], key="policy_choice"))
+    ev = (policy.evaluation or {}).get("alternative_policy_result", {})
+    p0 = (tm or {}).get("point", {})
+    pos = p0.get("tp", 0) + p0.get("fn", 0)
+    if active_mode == "policy":
+        tested = (f" In supplementary analysis on the previously used test set it caught {ev['caught']:,} of {pos:,} "
+                  f"positive-labelled providers, against {p0['tp']:,} under the original policy; fresh data is needed "
+                  "to establish its future performance.") if ev and p0 else ""
+        st.markdown(
+            '<div class="policy-note"><span class="chip policy">Recommended</span>The team recommends this policy to '
+            f'reduce missed cases while accepting additional reviews. Its threshold ({policy.threshold:.4f}) was '
+            f'chosen on validation data to reach at least {policy.target_recall:.0%} recall, after the original final '
+            f'evaluation was known.{tested} Changing policy changes which providers are flagged; their scores and '
+            'explanations stay the same.</div>', unsafe_allow_html=True)
+    else:
+        tested = f" ({p0['tp']:,} of {pos:,} caught)" if p0 else ""
+        st.markdown(
+            '<div class="policy-note"><span class="chip final">Final evaluation</span>The original policy: threshold '
+            f'{bundle.threshold:.4f}, targeting {_orig_target:.0%} validation recall, fixed before the one-time held-out '
+            f'test{tested}. The team now recommends the higher-recall policy.</div>', unsafe_allow_html=True)
+
+
 def triage_summary() -> None:
     share = n_flag / n_total
-    top = f", about the top {100 - thr_pct:.0f}% of training providers," if thr_pct is not None else ""
+    top = f", about the top {100 - active_pct:.0f}% of training providers," if active_pct is not None else ""
+    blank = f'<span class="swatch" style="background:#fff; box-shadow: inset 0 0 0 1px {PANEL_EDGE}"></span>'
+    if exploratory:
+        n_first = int((table["band"] == "Review first").sum())
+        n_extra = n_flag - n_first
+        sentence = f"{n_flag:,} of {n_total:,} {esc(data_label)} are flagged under the recommended higher-recall policy"
+        detail = (f"Providers scoring {active_threshold:.4f} or more{top} are flagged: {n_first:,} to review first "
+                  f"(scoring {bundle.threshold:.4f} or more, also flagged under the original policy) and {n_extra:,} "
+                  "for additional review. Scores are for prioritising review, not validated probabilities of fraud.")
+        bar = (f'<div class="flagged" style="width:{n_first / n_total * 100:.2f}%"></div>'
+               f'<div class="extra" style="width:{n_extra / n_total * 100:.2f}%"></div>')
+        legend = (f'<span><span class="swatch" style="background:{FLAG}"></span><b>{n_first:,}</b> review first</span>'
+                  f'<span><span class="swatch" style="background:{EXTRA}"></span><b>{n_extra:,}</b> additional review</span>'
+                  f'<span>{blank}<b>{n_total - n_flag:,}</b> not flagged (not cleared)</span>')
+    else:
+        sentence = f"{n_flag:,} of {n_total:,} {esc(data_label)} are flagged for review"
+        detail = (f"Risk scores run from 0 to 1. Providers scoring {active_threshold:.3f} or more{top} are flagged. "
+                  "The score is for prioritising review, not a validated probability of fraud, and a flag is a reason "
+                  "to look, not a finding.")
+        bar = f'<div class="flagged" style="width:{share * 100:.2f}%"></div>'
+        legend = (f'<span><span class="swatch" style="background:{FLAG}"></span><b>{n_flag:,}</b> flagged ({share:.1%})</span>'
+                  f'<span>{blank}<b>{n_total - n_flag:,}</b> below the threshold</span>')
     st.markdown(f"""
     <div class="triage">
-      <div class="sentence">{n_flag:,} of {n_total:,} {esc(data_label)} are flagged for review</div>
-      <div class="detail">Risk scores run from 0 to 1. Providers scoring {bundle.threshold:.3f} or more{top} are
-        flagged. The score is for prioritising review, not a validated probability of fraud, and a flag is a reason
-        to look, not a finding.</div>
-      <div class="bar" role="img" aria-label="{share:.1%} of providers flagged">
-        <div class="flagged" style="width:{share * 100:.2f}%"></div>
-      </div>
-      <div class="legend">
-        <span><span class="swatch" style="background:{FLAG}"></span><b>{n_flag:,}</b> flagged ({share:.1%})</span>
-        <span><span class="swatch" style="background:#fff; box-shadow: inset 0 0 0 1px {PANEL_EDGE}"></span>
-          <b>{n_total - n_flag:,}</b> below the threshold</span>
-      </div>
+      <div class="sentence">{sentence}</div>
+      <div class="detail">{detail}</div>
+      <div class="bar" role="img" aria-label="{share:.1%} of providers flagged">{bar}</div>
+      <div class="legend">{legend}</div>
     </div>""", unsafe_allow_html=True)
     saved = result.get("saved_check")
     if saved and saved["status"] == "match":
@@ -494,17 +587,22 @@ def data_checks() -> None:
 
 
 def position_bar(percentile: float, score: float) -> str:
-    if np.isnan(percentile) or thr_pct is None:
-        x, t, left, right = score * 100, bundle.threshold * 100, "Score 0", "Score 1"
+    use_scores = np.isnan(percentile) or thr_pct is None or active_pct is None
+    if use_scores:
+        x, t, t0, left, right = score * 100, active_threshold * 100, bundle.threshold * 100, "Score 0", "Score 1"
     else:
-        x, t, left, right = percentile, thr_pct, "Lowest scores", "Highest scores"
-    color = FLAG if score >= bundle.threshold else CALM
+        x, t, t0, left, right = percentile, active_pct, thr_pct, "Lowest scores", "Highest scores"
+    color = FLAG if score >= bundle.threshold else EXTRA if score >= active_threshold else CALM
     anchor = "transform:translateX(-100%)" if t > 75 else "transform:translateX(-50%)" if t > 25 else ""
+    label = "Review threshold (higher-recall policy)" if active_mode == "policy" else "Review threshold"
+    track = (f"linear-gradient(to right, {CALM_TINT} 0 {t:.2f}%, {EXTRA_TINT} {t:.2f}% {t0:.2f}%, {FLAG_TINT} {t0:.2f}% 100%)"
+             if exploratory else f"linear-gradient(to right, {CALM_TINT} 0 {t:.2f}%, {FLAG_TINT} {t:.2f}% 100%)")
+    original_line = f'<div class="threshold secondary" style="left:{t0:.2f}%"></div>' if exploratory else ""
     return f"""
-    <div class="position-labels top"><span style="left:{t:.2f}%; {anchor}">Review threshold</span></div>
+    <div class="position-labels top"><span style="left:{t:.2f}%; {anchor}">{label}</span></div>
     <div class="position" role="img" aria-label="Position against training providers">
-      <div class="track" style="background: linear-gradient(to right, {CALM_TINT} 0 {t:.2f}%, {FLAG_TINT} {t:.2f}% 100%)"></div>
-      <div class="threshold" style="left:{t:.2f}%"></div>
+      <div class="track" style="background: {track}"></div>
+      <div class="threshold" style="left:{t:.2f}%"></div>{original_line}
       <div class="dot" style="left:{min(max(x, 1), 99):.2f}%; background:{color}"></div>
     </div>
     <div class="position-labels"><span style="left:0">{left}</span><span style="right:0">{right}</span></div>"""
@@ -541,10 +639,12 @@ def case_panel(view_ids: list[str]) -> None:
     pid = ss["selected_provider"]
     row = int(table.index[table[id_col] == pid][0])
     rec = table.loc[row]
-    flagged = bool(rec["flagged"])
     review = reviews.get(pid, {"shortlisted": False, "note": ""})
-    chips = ('<span class="chip flag">Flagged for review</span>' if flagged
-             else '<span class="chip calm">Below the threshold</span>')
+    chips = {"Review first": '<span class="chip flag">Review first</span>',
+             "Additional review": f'<span class="chip extra">{EXTRA_LABEL.get(active_mode, "Additional review")}</span>',
+             "Not flagged": '<span class="chip calm">Not flagged</span>',
+             "Flagged": '<span class="chip flag">Flagged for review</span>',
+             "Below": '<span class="chip calm">Below the threshold</span>'}[rec["band"]]
     if review["shortlisted"]:
         chips += '<span class="chip short">Shortlisted</span>'
     if pid not in view_ids:
@@ -655,7 +755,9 @@ def export_frame(view: pd.DataFrame) -> pd.DataFrame:
     out["review_note"] = [reviews.get(p, {}).get("note", "") for p in out[id_col]]
     out["model"] = bundle.model_name
     out["run_id"] = bundle.run_id
-    out["review_threshold"] = bundle.threshold
+    out["review_policy"] = active_name
+    out["review_threshold"] = active_threshold
+    out["original_threshold"] = bundle.threshold
     out["source_file"] = data_name
     out["scored_at"] = result.get("scored_at", "")
     return out
@@ -665,6 +767,7 @@ with tab_queue:
     if queue_state != "ok":
         queue_unavailable()
     else:
+        policy_picker()
         triage_summary()
         shortlisted = {p for p, r in reviews.items() if r.get("shortlisted")}
         # Fixed labels: a label that changes (e.g. with a count) would reset the filter.
@@ -673,8 +776,14 @@ with tab_queue:
         with c_scope:
             st.markdown('<div class="sub-head" style="margin-top:0">Show</div>', unsafe_allow_html=True)
             scope = filters[pick_one("Show", list(filters), key="scope")]
-            st.caption(f"{n_flag:,} flagged, {n_total - n_flag:,} below the threshold, "
-                       f"{len(shortlisted):,} shortlisted")
+            counts = table["band"].value_counts()
+            if exploratory:
+                st.caption(f"{counts.get('Review first', 0):,} review first, {counts.get('Additional review', 0):,} "
+                           f"additional review, {counts.get('Not flagged', 0):,} not flagged, "
+                           f"{len(shortlisted):,} shortlisted")
+            else:
+                st.caption(f"{n_flag:,} flagged, {n_total - n_flag:,} below the threshold, "
+                           f"{len(shortlisted):,} shortlisted")
         with c_search:
             query = st.text_input("Find a provider", placeholder="Type part of a provider ID", key="query").strip()
 
@@ -704,7 +813,7 @@ with tab_queue:
                     "Provider": view[id_col].to_numpy(),
                     "Risk score": view["score"].to_numpy(),
                     "Percentile": view["percentile"].to_numpy(),
-                    "Status": np.where(view["flagged"], "Flagged", "Below"),
+                    "Status": view["band"].to_numpy(),
                     "Shortlist": ["Yes" if p in shortlisted else "" for p in view[id_col]],
                     "Top factors": view["drivers"].to_numpy(),
                 })
@@ -716,7 +825,7 @@ with tab_queue:
                     "Percentile": st.column_config.NumberColumn(
                         format="%.0f", width="small",
                         help="Share of training providers (out-of-fold scores) with a lower score."),
-                    "Status": st.column_config.TextColumn(width="small", help="Flagged = at or above the review threshold."),
+                    "Status": st.column_config.TextColumn(width="small", help="Flag status under the review policy chosen above."),
                     "Shortlist": st.column_config.TextColumn(width="small", help="Your shortlist, separate from model flags."),
                     "Top factors": st.column_config.TextColumn(help="The two factors that raise the score most."),
                 }
@@ -748,7 +857,8 @@ with tab_queue:
 # --------------------------------------------------------------------------------------
 # Model and evidence: one topic at a time
 # --------------------------------------------------------------------------------------
-MODEL_SECTIONS = ["Performance", "Review threshold", "This file", "Features", "Limitations", "Run details"]
+MODEL_SECTIONS = ["Performance", "Review thresholds", "Review policies", "This file", "Features", "Limitations",
+                  "Run details"]
 
 
 def rule_sentence() -> str:
@@ -764,6 +874,26 @@ def rule_sentence() -> str:
     return "The threshold was chosen on validation data and frozen before final testing."
 
 
+def outcome_grid(tp: int, fn: int, fp: int, tn: int, base: dict | None = None) -> str:
+    """Confusion matrix in dataset-label wording; with base, each cell also shows the change from it."""
+    def change(value, key):
+        if base is None:
+            return ""
+        d = value - base[key]
+        sign = "+" if d > 0 else "\u2212"
+        return f"<em>{sign}{abs(d):,} vs original</em>" if d else "<em>same as original</em>"
+    return f"""
+    <table class="outcome">
+      <tr><th></th><th>Flagged</th><th>Not flagged</th></tr>
+      <tr><th>Dataset label: potential fraud ({tp + fn:,})</th>
+          <td class="caught"><b>{tp:,}</b><span>caught</span>{change(tp, "tp")}</td>
+          <td><b>{fn:,}</b><span>missed</span>{change(fn, "fn")}</td></tr>
+      <tr><th>Dataset label: no potential fraud ({fp + tn:,})</th>
+          <td><b>{fp:,}</b><span>flagged, label says no</span>{change(fp, "fp")}</td>
+          <td><b>{tn:,}</b><span>not flagged, label says no</span>{change(tn, "tn")}</td></tr>
+    </table>"""
+
+
 def model_performance() -> None:
     n_test = (tm or {}).get("n_test")
     tested = f", then frozen and tested once on {n_test:,} held-out providers" if n_test else ""
@@ -773,22 +903,13 @@ def model_performance() -> None:
             "one-time evaluation, so they do not change with the file you score.")
     left, right = st.columns([1, 1.2], gap="large")
     with left:
-        sub_head("Held-out test outcome")
+        sub_head("Original policy: final evaluation on the held-out test")
         if not tm:
             st.info("The held-out test results are not in this run folder.")
         else:
             p = tm["point"]
-            pos, neg = p["tp"] + p["fn"], p["fp"] + p["tn"]
-            st.markdown(f"""
-            <table class="outcome">
-              <tr><th></th><th>Flagged</th><th>Not flagged</th></tr>
-              <tr><th>Dataset label: potential fraud ({pos:,})</th>
-                  <td class="caught"><b>{p['tp']:,}</b><span>caught</span></td>
-                  <td><b>{p['fn']:,}</b><span>missed</span></td></tr>
-              <tr><th>Dataset label: no potential fraud ({neg:,})</th>
-                  <td><b>{p['fp']:,}</b><span>flagged, label says no</span></td>
-                  <td><b>{p['tn']:,}</b><span>not flagged, label says no</span></td></tr>
-            </table>""", unsafe_allow_html=True)
+            pos = p["tp"] + p["fn"]
+            st.markdown(outcome_grid(p["tp"], p["fn"], p["fp"], p["tn"]), unsafe_allow_html=True)
             note(f"Reviewing {p['tp'] + p['fp']:,} providers ({p['flagged_share']:.1%} of the test set) would reach "
                  f"{p['tp']:,} of the {pos:,} providers labelled potential fraud. About "
                  f"{p['fp'] / max(p['tp'] + p['fp'], 1):.0%} of flags carry a negative dataset label. Dataset labels "
@@ -811,23 +932,82 @@ def model_performance() -> None:
         st.dataframe(pd.DataFrame(rows), hide_index=True, **FILL["dataframe"])
         note("Validation figures come from cross-validation on the training providers. Test ranges come from 2,000 "
              "bootstrap resamples. Average precision summarises ranking quality across every threshold; it is not accuracy.")
+    if policy is not None and tm:
+        supplementary_results()
+
+
+def supplementary_results() -> None:
+    """The recommended policy next to the original: its matrix, then validation target versus observed result."""
+    ev = policy.evaluation or {}
+    p0, p1 = tm["point"], ev.get("alternative_policy_result", {})
+    pos, neg = p0["tp"] + p0["fn"], p0["fp"] + p0["tn"]
+    reviews0 = p0["tp"] + p0["fp"]
+    st.markdown('<div style="height:1.2rem"></div>', unsafe_allow_html=True)
+    left, right = st.columns([1, 1.2], gap="large")
+    with left:
+        sub_head("Higher-recall policy: supplementary evaluation on the previously used test set")
+        if p1:
+            st.markdown(outcome_grid(p1["caught"], p1["missed"], p1["false_alerts"], p1["tn"], base=p0),
+                        unsafe_allow_html=True)
+            note(f"Same {pos:,} positive-labelled and {neg:,} negative-labelled test providers as the original "
+                 "evaluation; only the threshold differs. Changes are relative to the original policy.", top=0.6)
+        else:
+            st.info("The supplementary evaluation file is not in artifacts/shared.")
+    with right:
+        sub_head("Original and higher-recall policies compared")
+        rows = [
+            ("Validation recall target", f"{_orig_target:.0%}", f"{policy.target_recall:.0%}"),
+            ("Threshold", f"{bundle.threshold:.4f}", f"{policy.threshold:.4f}"),
+            ("Observed test recall", f"{p0['tp'] / pos:.1%}", f"{p1['recall']:.1%}" if p1 else "not evaluated"),
+            ("Test: caught / missed", f"{p0['tp']:,} / {p0['fn']:,}", f"{p1['caught']:,} / {p1['missed']:,}" if p1 else "n/a"),
+            ("Test: providers reviewed", f"{reviews0:,}", f"{p1['reviewed']:,}" if p1 else "n/a"),
+            ("Test: precision", f"{p0['tp'] / max(reviews0, 1):.1%}", f"{p1['precision']:.1%}" if p1 else "n/a"),
+            ("Evaluation status", "Original final evaluation", "Supplementary evaluation"),
+        ]
+        st.dataframe(pd.DataFrame(rows, columns=["", "Original policy", "Higher-recall policy (recommended)"]),
+                     hide_index=True, **FILL["dataframe"])
+        if p1:
+            extra = p1["reviewed"] - reviews0
+            recovered = len(ev.get("original_misses_flagged_by_policy", []))
+            added = ev.get("additional_negative_labelled_flagged", extra - recovered)
+            ci = ev.get("alternative_policy_95ci", {}).get("recall")
+            rng = f" (95% bootstrap range {ci['ci_low']:.0%} to {ci['ci_high']:.0%})" if ci else ""
+            note(f"The change is from an {_orig_target:.0%}-target policy to a {policy.target_recall:.0%}-target "
+                 f"policy. Its {extra:,} additional reviews include {recovered:,} positive-labelled and {added:,} "
+                 f"negative-labelled providers. Observed test recall{rng} comes from the previously used test set, so "
+                 "it is not independent confirmation; fresh data is needed to establish future performance.", top=0.3)
+        disclosure = policy.record.get("disclosure")
+        if disclosure:
+            note(f"Disclosure: {esc(disclosure)}", top=0.4)
 
 
 def model_threshold() -> None:
-    section("How the review threshold was set",
-            f"The threshold is <b>{bundle.threshold:.3f}</b>. {rule_sentence()} The held-out test then measured how "
-            "it performs on new providers.")
+    recommended = (f" The recommended higher-recall policy applies the same rule with a {policy.target_recall:.0%} "
+                   f"target, giving <b>{policy.threshold:.4f}</b>; it was chosen after the original evaluation was known."
+                   if policy else "")
+    section("How the review thresholds were set",
+            f"The original threshold is <b>{bundle.threshold:.4f}</b>. {rule_sentence()} The held-out test then measured "
+            f"how it performs on new providers.{recommended}")
     curve = core.workload_curve(bundle)
     if curve is None:
         st.info("The training providers' out-of-fold scores are not in this run folder.")
         return
     frozen = curve.iloc[(curve["threshold"] - bundle.threshold).abs().argmin()]
-    st.markdown(f"""
-    <div class="stats">
-      <div class="stat flag"><b>{frozen['share_flagged']:.0%}</b><span>of training providers flagged (validation)</span></div>
-      <div class="stat"><b>{frozen['recall']:.0%}</b><span>of labelled providers caught (validation)</span></div>
-      <div class="stat"><b>{frozen['precision']:.0%}</b><span>of flags carry a positive label (validation)</span></div>
-    </div>""", unsafe_allow_html=True)
+    marks = [dict(frozen, Policy="Original")]
+    if policy:
+        rec_point = curve.iloc[(curve["threshold"] - policy.threshold).abs().argmin()]
+        marks.append(dict(rec_point, Policy="Recommended"))
+        arrow = lambda k, fmt: f"{fmt(frozen[k])} \u2192 {fmt(rec_point[k])}"
+        figures = [(arrow("share_flagged", "{:.0%}".format), "of training providers flagged (original \u2192 recommended)"),
+                   (arrow("recall", "{:.0%}".format), "of labelled providers caught (validation)"),
+                   (arrow("precision", "{:.0%}".format), "of flags carry a positive label (validation)")]
+    else:
+        figures = [(f"{frozen['share_flagged']:.0%}", "of training providers flagged (validation)"),
+                   (f"{frozen['recall']:.0%}", "of labelled providers caught (validation)"),
+                   (f"{frozen['precision']:.0%}", "of flags carry a positive label (validation)")]
+    st.markdown('<div class="stats">' + "".join(
+        f'<div class="stat{" flag" if i == 0 else ""}"><b>{v}</b><span>{t}</span></div>' for i, (v, t) in enumerate(figures))
+        + "</div>", unsafe_allow_html=True)
     line = alt.Chart(curve).mark_line(color=BLUE, strokeWidth=2.2).encode(
         x=alt.X("share_flagged:Q", title="Share of providers flagged for review", axis=alt.Axis(format="%")),
         y=alt.Y("recall:Q", title="Labelled providers caught", axis=alt.Axis(format="%")),
@@ -835,14 +1015,89 @@ def model_threshold() -> None:
                  alt.Tooltip("share_flagged:Q", format=".1%", title="Flagged"),
                  alt.Tooltip("recall:Q", format=".1%", title="Caught"),
                  alt.Tooltip("precision:Q", format=".1%", title="Precision")])
-    point = alt.Chart(pd.DataFrame([frozen])).mark_point(color=FLAG, size=150, filled=True, opacity=1).encode(
+    marks_df = pd.DataFrame(marks)
+    point = alt.Chart(marks_df).mark_point(color=FLAG, size=150, filled=True, opacity=1).encode(
         x="share_flagged:Q", y="recall:Q")
-    label = alt.Chart(pd.DataFrame([frozen])).mark_text(align="left", dx=12, dy=14, color=FLAG_TEXT, fontWeight=600,
-                                                        font=FONT).encode(
-        x="share_flagged:Q", y="recall:Q", text=alt.value("Chosen threshold"))
+    label = alt.Chart(marks_df).mark_text(align="left", dx=12, dy=14, color=FLAG_TEXT, fontWeight=600,
+                                          font=FONT).encode(x="share_flagged:Q", y="recall:Q", text="Policy:N")
     st.altair_chart(style((line + point + label).properties(height=360)), **FILL["altair_chart"])
     st.caption("Each point on the line is a possible threshold, from the training providers' out-of-fold scores. "
                "Flagging more providers catches more labelled ones at the cost of more reviews. Hover to compare.")
+
+
+def recall_targets_table() -> None:
+    """Validation-only comparison of the original policy, the recommended policy and the what-ifs."""
+    rows = [("Original policy", _orig_target, bundle.threshold,
+             f"Final evaluation: {tm['point']['tp']:,} of {tm['point']['tp'] + tm['point']['fn']:,} caught" if tm else "n/a")]
+    if policy:
+        alt_r = (policy.evaluation or {}).get("alternative_policy_result", {})
+        rows.append(("Higher-recall policy (recommended)", policy.target_recall, policy.threshold,
+                     f"Supplementary: {alt_r['caught']:,} of {alt_r['caught'] + alt_r['missed']:,} caught" if alt_r
+                     else "not evaluated"))
+    rows += [("What-if (validation only)", w.target_recall, w.threshold, "Not evaluated") for w in what_ifs]
+    rows.sort(key=lambda r: -r[2])
+    base = core.validation_outcome(bundle, bundle.threshold)
+    table_rows, prev = [], None
+    for kind, target, thr, test in rows:
+        v = core.validation_outcome(bundle, thr)
+
+        def per_catch(ref):
+            if ref is None or v["caught"] <= ref["caught"]:
+                return ""
+            return f"{(v['reviewed'] - ref['reviewed']) / (v['caught'] - ref['caught']):.1f}"
+
+        table_rows.append({
+            "": kind, "Validation target": f"{target:.0%}" if target else "n/a", "Threshold": f"{thr:.4f}",
+            "Caught (validation)": f"{v['caught']:,} of {v['caught'] + v['missed']:,}", "Missed": f"{v['missed']:,}",
+            "Providers reviewed": f"{v['share_reviewed']:.1%}", "Precision": f"{v['precision']:.1%}",
+            "Extra reviews per extra catch, vs original": per_catch(base),
+            "Extra reviews per extra catch, vs row above": per_catch(prev),
+            "Held-out test": test})
+        prev = v
+    sub_head("Recall targets compared on validation data")
+    if what_if_problem:
+        st.warning(what_if_problem)
+    st.dataframe(pd.DataFrame(table_rows), hide_index=True, **FILL["dataframe"])
+    note("All rows apply the same rule to the training providers' out-of-fold scores: the highest precision among "
+         "thresholds meeting the validation target. The increment columns compare each row with the original policy "
+         "and with the row above. What-ifs appear only here, on validation data; they were never applied to the "
+         "held-out providers and cannot now be tested on them, because that test set has already informed this work. "
+         "Lower thresholds trade fewer misses for more reviews; flagging every provider would catch all labelled ones "
+         "but remove the benefit of prioritising reviews.", top=0.3)
+
+
+def model_policies() -> None:
+    if policy is None:
+        section("Review policies", esc(policy_problem) if policy_problem else
+                "Only the original policy has been evaluated; no higher-recall policy has been committed.")
+        if what_ifs:
+            recall_targets_table()
+        return
+    rec, ev = policy.record, policy.evaluation or {}
+    section("Review policies",
+            f"The team recommends the <b>{esc(policy.name)}</b> for the proposed review workflow: it reduces missed "
+            "cases while accepting additional reviews. The original policy remains the project's final evaluation. "
+            "Both use the same frozen LightGBM model, so scores and explanations are identical; only the threshold "
+            "that decides who is flagged differs. Results for both are under Performance.")
+    if ev:
+        misses, recovered = len(ev.get("original_misses", [])), len(ev.get("original_misses_flagged_by_policy", []))
+        added = ev.get("additional_negative_labelled_flagged", 0)
+        note(f"On the previously used test set, the recommended policy flags {recovered} of the {misses} providers the "
+             f"original policy missed, and {misses - recovered} remain missed. Its {recovered + added:,} additional "
+             f"reviews include {recovered} positive-labelled and {added:,} negative-labelled providers.")
+    sub_head("How the queue groups providers under the recommended policy")
+    st.markdown(f"""
+    <div class="stats">
+      <div class="stat flag"><b>{bundle.threshold:.4f}+</b><span>Review first: also flagged under the original policy</span></div>
+      <div class="stat"><b>{policy.threshold:.4f} to {bundle.threshold:.4f}</b><span>Additional review: flagged only
+        under the higher-recall policy. These need real review, or the extra recall is not delivered.</span></div>
+      <div class="stat"><b>below {policy.threshold:.4f}</b><span>Not flagged by this model; not automatically cleared</span></div>
+    </div>""", unsafe_allow_html=True)
+    note(f"Decided by {esc(rec.get('decided_by', 'n/a'))}, committed {esc(rec.get('committed_at', 'n/a'))}. Rationale: "
+         f"{esc(rec.get('rationale', 'n/a'))}")
+    if rec.get("disclosure"):
+        note(f"Disclosure: {esc(rec['disclosure'])}", top=0.3)
+    recall_targets_table()
 
 
 def model_this_file() -> None:
@@ -850,11 +1105,12 @@ def model_this_file() -> None:
         section("This file", "No file is scored on this computer at the moment, so there is nothing to describe. "
                              "See the Review queue tab for the reason.")
         return
+    policy_text = f" Flags follow the {active_name}, as chosen in the queue." if exploratory else ""
     section(f"This file: {file_desc}",
             "Everything in this section is calculated from the providers currently loaded, so it changes when you "
-            "score another file. Labels are never used here.")
+            f"score another file. Labels are never used here.{policy_text}")
     share_file = n_flag / n_total
-    share_train = (100 - thr_pct) / 100 if thr_pct is not None else None
+    share_train = (100 - active_pct) / 100 if active_pct is not None else None
     train_block = (f'<div class="stat"><b>{share_train:.1%}</b><span>flagged among training providers '
                    '(reference)</span></div>' if share_train is not None else "")
     st.markdown(f"""
@@ -893,7 +1149,7 @@ def model_this_file() -> None:
             even = alt.Chart(pd.DataFrame({"y": [0.1]})).mark_rule(color=MUTED, strokeDash=[4, 3]).encode(y="y:Q")
             st.altair_chart(style((bars + even).properties(height=300)), **FILL["altair_chart"])
             st.caption("Each bar is split by each provider's actual flag. The review threshold sits at about the "
-                       f"{thr_pct:.1f}th percentile, inside its band. If the file's scores were spread like the training "
+                       f"{active_pct:.1f}th percentile, inside its band. If the file's scores were spread like the training "
                        "providers', each band would hold about 10% (dashed line).")
         sub_head("Values outside the training range")
         outside = result.get("outside")
@@ -942,8 +1198,9 @@ def model_features() -> None:
 LIMITS = [
     ("A proxy label", "The potential-fraud label comes from the dataset. It is not a finding of misconduct, so every "
                       "flag needs human review."),
-    ("Recall can vary", "The threshold kept validation recall at or above 80%. Held-out recall was higher, but its "
-                        "range is wide, so a new file can land below 80%."),
+    ("Targets are not results", "The original policy targeted 80% validation recall and the recommended policy 90%. "
+                                "Observed test recall (85% and 95%) reflects one sample, and the 95% comes from a test "
+                                "set that had already informed the choice. Future files can land lower."),
     ("Associations, not causes", "Factors show what the model responded to. Missing-data flags in particular can stand "
                                  "in for a provider's mix of claims."),
     ("Network information", "Physician-network factors describe links across the provider population. Scoring a new "
@@ -988,9 +1245,11 @@ with tab_model:
     st.markdown('<div style="height:0.6rem"></div>', unsafe_allow_html=True)
     chosen = pick_one("Section", MODEL_SECTIONS, key="model_section")
     st.markdown(
-        '<div class="scope-note"><b>Performance</b> comes from the one-time held-out evaluation. The <b>review '
-        'threshold</b> was set on validation data before that evaluation, which then measured how it performs. Both, '
-        'like the <b>Features</b> and <b>Limitations</b>, stay the same for any file. <b>This file</b> describes '
-        f'{esc(file_desc)}.</div>', unsafe_allow_html=True)
-    {"Performance": model_performance, "Review threshold": model_threshold, "This file": model_this_file,
+        '<div class="scope-note"><b>Performance</b> shows the original policy\'s final evaluation and, labelled '
+        'separately, the supplementary result of the recommended higher-recall policy. <b>Review thresholds</b> explains '
+        'how both thresholds were set on validation data. <b>Review policies</b> records the recommendation and compares '
+        'recall targets on validation data, including a what-if that was never tested. These stay the same for any '
+        f'file. <b>This file</b> describes {esc(file_desc)}.</div>', unsafe_allow_html=True)
+    {"Performance": model_performance, "Review thresholds": model_threshold, "Review policies": model_policies,
+     "This file": model_this_file,
      "Features": model_features, "Limitations": model_limits, "Run details": model_run_details}[chosen]()

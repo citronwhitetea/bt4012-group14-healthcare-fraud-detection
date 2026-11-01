@@ -1,0 +1,78 @@
+{
+  "status": "supplementary evaluation on the previously used test set; the original result remains the final evaluation",
+  "policy_git_commit": "cf6acf5eaae1847e868ad631aed1304e6d1f93f3 2026-11-01T21:29:10+08:00",
+  "policy_committed_at": "2026-11-01T21:27:25",
+  "evaluated_at": "2026-11-01T21:29:14",
+  "target_recall": 0.9,
+  "threshold": 0.0240938744582718,
+  "original_threshold_result": {
+    "threshold": 0.08610464772643815,
+    "caught": 86,
+    "missed": 15,
+    "reviewed": 177,
+    "share_reviewed": 0.16358595194085027,
+    "recall": 0.8514851485148515,
+    "precision": 0.4858757062146893,
+    "false_alerts": 91,
+    "tn": 890
+  },
+  "alternative_policy_result": {
+    "threshold": 0.0240938744582718,
+    "caught": 96,
+    "missed": 5,
+    "reviewed": 260,
+    "share_reviewed": 0.24029574861367836,
+    "recall": 0.9504950495049505,
+    "precision": 0.36923076923076925,
+    "false_alerts": 164,
+    "tn": 817
+  },
+  "alternative_policy_95ci": {
+    "recall": {
+      "ci_low": 0.900990099009901,
+      "ci_high": 0.9900990099009901
+    },
+    "precision": {
+      "ci_low": 0.33674534941225703,
+      "ci_high": 0.4049612930222826
+    },
+    "share_reviewed": {
+      "ci_low": 0.21903881700554528,
+      "ci_high": 0.26247689463955637
+    }
+  },
+  "original_misses": [
+    "PRV53787",
+    "PRV57569",
+    "PRV56361",
+    "PRV54361",
+    "PRV54505",
+    "PRV51005",
+    "PRV57667",
+    "PRV55057",
+    "PRV57096",
+    "PRV54876",
+    "PRV54743",
+    "PRV52826",
+    "PRV53671",
+    "PRV55010",
+    "PRV51482"
+  ],
+  "original_misses_flagged_by_policy": [
+    "PRV53787",
+    "PRV54361",
+    "PRV51005",
+    "PRV57667",
+    "PRV55057",
+    "PRV57096",
+    "PRV54876",
+    "PRV54743",
+    "PRV53671",
+    "PRV51482"
+  ],
+  "additional_negative_labelled_flagged": 73,
+  "n_test": 1082,
+  "n_test_positive": 101,
+  "n_boot": 2000,
+  "seed": 4012
+}

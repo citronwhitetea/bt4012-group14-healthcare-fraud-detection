@@ -271,3 +271,69 @@ def test_waterfall_runs_from_average_to_score(scored):
     final = steps.iloc[-1]["end"]
     assert steps.iloc[0]["kind"] == "base" and steps.iloc[-1]["kind"] == "final"
     assert abs(core.sigmoid(final) - scored.table["score"].iloc[0]) < 1e-6
+
+
+# ---------------------------------------------------------------- exploratory review policy
+def _write_policy(tmp: Path, bundle, **changes):
+    record = {"target_recall": 0.9, "threshold": bundle.threshold / 3, "original_threshold": bundle.threshold,
+              "run_id": bundle.run_id, "pipeline_sha256": bundle.meta["fingerprints_sha256"]["pipeline"],
+              "oof_predictions_sha256": core.sha256(bundle.run_dir / "oof_predictions.csv")}
+    record.update(changes)
+    path = tmp / "policy.json"
+    path.write_text(json.dumps(record))
+    return path, record
+
+
+def test_matching_policy_is_loaded(bundle):
+    tmp = Path(tempfile.mkdtemp()); atexit.register(shutil.rmtree, tmp, True)
+    path, record = _write_policy(tmp, bundle)
+    evaluation = tmp / "eval.json"
+    evaluation.write_text(json.dumps({"threshold": record["threshold"]}))
+    policy, problem = core.load_policy(bundle, path, evaluation)
+    assert problem is None and policy.threshold == record["threshold"] and policy.evaluation is not None
+
+
+@pytest.mark.parametrize("change,expect", [
+    ({"run_id": "20250101_000000_full"}, "different run"),
+    ({"pipeline_sha256": "0" * 64}, "different model file"),
+    ({"threshold": 0.99}, "not below the original"),
+    ({"original_threshold": 0.5}, "original threshold differs"),
+    ({"oof_predictions_sha256": "1" * 64}, "validation predictions have changed"),
+])
+def test_mismatched_policy_is_refused(bundle, change, expect):
+    tmp = Path(tempfile.mkdtemp()); atexit.register(shutil.rmtree, tmp, True)
+    path, _ = _write_policy(tmp, bundle, **change)
+    policy, problem = core.load_policy(bundle, path, tmp / "no_eval.json")
+    assert policy is None and expect in problem
+
+
+def test_policy_with_evaluation_at_another_threshold_is_refused(bundle):
+    tmp = Path(tempfile.mkdtemp()); atexit.register(shutil.rmtree, tmp, True)
+    path, _ = _write_policy(tmp, bundle)
+    evaluation = tmp / "eval.json"
+    evaluation.write_text(json.dumps({"threshold": 0.0001}))
+    policy, problem = core.load_policy(bundle, path, evaluation)
+    assert policy is None and "different threshold" in problem
+
+
+def test_no_policy_file_means_original_only(bundle):
+    assert core.load_policy(bundle, Path("/nonexistent/policy.json")) == (None, None)
+
+
+# ---------------------------------------------------------------- validation-only what-ifs
+def test_what_ifs_need_the_rule_to_reproduce_the_frozen_threshold(bundle):
+    reproduced = core.recall_threshold(bundle, 0.8)
+    if reproduced is not None and abs(reproduced - bundle.threshold) < 1e-12:
+        pytest.skip("this fixture's threshold happens to match the rule")
+    options, problem = core.what_if_options(bundle)
+    assert options == [] and "do not reproduce" in problem
+
+
+def test_what_ifs_when_the_rule_reproduces(bundle):
+    import dataclasses
+    consistent = dataclasses.replace(bundle, threshold=core.recall_threshold(bundle, 0.8))
+    options, problem = core.what_if_options(consistent)
+    assert problem is None and [o.target_recall for o in options] == [0.90, 0.95]
+    assert all(o.threshold < consistent.threshold for o in options) and options[1].threshold <= options[0].threshold
+    only_95, _ = core.what_if_options(consistent, exclude=0.90)          # the committed target is not repeated
+    assert [o.target_recall for o in only_95] == [0.95] and "validation only" in only_95[0].name

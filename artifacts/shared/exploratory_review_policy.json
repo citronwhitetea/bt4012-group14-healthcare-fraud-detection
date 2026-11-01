@@ -1,0 +1,34 @@
+{
+  "policy": "exploratory high-recall review policy",
+  "target_recall": 0.9,
+  "threshold": 0.0240938744582718,
+  "rule": "highest out-of-fold validation precision among thresholds with recall >= target",
+  "original_threshold": 0.08610464772643815,
+  "run_id": "20261011_232303_full",
+  "model": "lgbm",
+  "strategy": "original",
+  "pipeline_sha256": "65316d155c638b96ef14e8a32e51f7d546b8458b863df2a1a7e1c67e52dce6c9",
+  "oof_predictions_sha256": "1fb082f9321d3b9ff05f89e7cd9d8e0203c068381021e0599b8a85d9526c0e95",
+  "validation_pooled": {
+    "threshold": 0.0240938744582718,
+    "caught": 365,
+    "missed": 40,
+    "reviewed": 1036,
+    "share_reviewed": 0.23937153419593346,
+    "recall": 0.9012345679012346,
+    "precision": 0.35231660231660233,
+    "false_alerts": 671,
+    "tn": 3252
+  },
+  "validation_recall_fold_left_out_of_choice": {
+    "0": 0.9012345679012346,
+    "1": 0.8765432098765432,
+    "2": 0.8888888888888888,
+    "3": 0.8641975308641975,
+    "4": 0.9506172839506173
+  },
+  "decided_by": "Pei and Swei",
+  "rationale": "Catches about 90% of labelled providers in validation for roughly a quarter of providers reviewed; recall stayed close to target in every fold. 95% would need about a third reviewed for 20 more catches.",
+  "committed_at": "2026-11-01T21:27:25",
+  "disclosure": "Proposed after the original held-out result (86 caught, 15 missed) was known, which motivated it. The threshold was chosen on out-of-fold validation predictions only. The frozen model, its original threshold and the original final evaluation are unchanged."
+}
