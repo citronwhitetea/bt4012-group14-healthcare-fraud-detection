@@ -879,7 +879,12 @@ def outcome_grid(tp: int, fn: int, fp: int, tn: int, base: dict | None = None) -
 
 def model_performance() -> None:
     n_test = (tm or {}).get("n_test")
-    tested = f", then frozen and tested once on {n_test:,} held-out providers" if n_test else ""
+    if not n_test:
+        tested = ""
+    elif policy is not None and tm:
+        tested = f", then frozen and evaluated on {n_test:,} held-out providers at both targets"
+    else:
+        tested = f", then frozen and tested once on {n_test:,} held-out providers"
     story = ""
     if policy is not None and tm:
         p0 = tm["point"]
