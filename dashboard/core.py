@@ -842,7 +842,7 @@ class ReviewPolicy:
 
     @property
     def name(self) -> str:
-        return f"Higher-recall policy \u2014 {self.target_recall:.0%} validation target"
+        return f"{self.target_recall:.0%} validation target (chosen)"
 
 
 def load_policy(bundle: ModelBundle, path: Path = POLICY_PATH,
