@@ -88,7 +88,7 @@ You need `data/processed/` locally (run notebooks 01–05) and the run folder `a
 - **The report must match the pipeline.**
   - Section 3.2 should say resampling for the final models happened inside each fold, not on pre-resampled datasets.
   - Section 3.1 should mention that the three averaged features were reset and re-filled within folds.
-  - The boosting models used all 26 features; the 15-feature VIF set was for logistic regression.
+  - The boosting models used all 26 features; logistic regression was run with all 26 (`lr_all`) or with VIF selection refitted inside each fold (`lr_vif10`, `lr_vif5`). The full-data VIF<10 list in `feature_sets.json` has 22 features.
 - **AI assistance.** I used Claude to help write the 06b and 06d notebooks, the dashboard and parts of the report text. A coding agent also ran the final model selection and test through a helper script, with my confirmation. The report needs to acknowledge this, as the brief requires.
 - **Unrelated local changes.** These are on my machine and not committed: re-run outputs in 06c (Swei's notebook), and old run folders (`..._quick`, `..._230823_full`). Swei, tell me if you want the 06c outputs committed.
 - **Ask me** if any number doesn't match. I can walk anyone through the notebooks or the dashboard before the presentation.

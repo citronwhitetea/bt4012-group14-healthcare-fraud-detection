@@ -506,8 +506,13 @@ def build_benford_features(df: pd.DataFrame, min_claims: int = 20) -> pd.DataFra
     Nuance vs. the aggregate-level Benford check in Step 3
     (notebooks/03a_claim_level_eda.ipynb): pooling Fraud vs Non-Fraud
     together made the two groups look nearly identical (MAD 0.0186 vs
-    0.0181). Per provider, a modest but real difference emerges (0.030 vs
-    0.037, Cohen's d = -0.54) — aggregating had masked it.
+    0.0181). Per provider the groups do differ (0.030 vs 0.037, Cohen's
+    d = -0.54), but notebooks/07_shap_evaluation.ipynb section 9 shows this
+    is explained by claim volume: MAD shrinks as claim count grows, and
+    fraud-labelled providers are larger. Compared against the dataset's own
+    digit pattern at the same claim count and claim mix, d = +0.07 (95% CI
+    includes 0). Team decision (27 Oct 2026): keep BenfordMAD as a tested
+    feature, but do not present it as a detector of manipulated amounts.
     """
     claims_per_provider = df.groupby("Provider").size()
     eligible_providers = claims_per_provider[claims_per_provider >= min_claims].index

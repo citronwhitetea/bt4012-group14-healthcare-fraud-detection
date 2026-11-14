@@ -83,7 +83,7 @@ Pure descriptive EDA at **claim grain** (one row per claim), no `src/eda.py`/`sr
 - 11.3% of claims fall within 7 days of the same beneficiary's prior claim, 35.4% within 30 days
 - 2,798 claims share the same BeneID + Provider + ClaimStartDt
 - `ClaimType` has a real but small-to-moderate association with fraud (Cramér's V = 0.11)
-- Aggregate Benford's Law: not discriminative (MAD 0.0186 fraud vs. 0.0181 non-fraud) — see Step 3b for the per-provider version, which *is* discriminative
+- Aggregate Benford's Law: not discriminative (MAD 0.0186 fraud vs. 0.0181 non-fraud) — the per-provider version in Step 3b differs between groups (d = -0.54), but `07` section 9 shows that mostly reflects claim volume, so it is not presented as a fraud signal
 
 ---
 

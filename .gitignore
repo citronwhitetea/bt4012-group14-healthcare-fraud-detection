@@ -220,11 +220,11 @@ __marimo__/
 # macOS system files
 .DS_Store
 
-# Raw data — download from Kaggle/sent by Jada in the gc instead of tracking in git (see notebooks/00_setup_guide.ipynb)
+# Raw data — download from Kaggle/sent by Jada in the gc instead of tracking in git (see "bt4012_handover (internal)/00_setup_guide.ipynb")
 data/raw/*
 !data/raw/.gitkeep
 
-# Processed data — regenerate via notebooks/01, 02, 04 instead of tracking in git
+# Processed data — regenerate with `bash run_pipeline.sh` (notebooks 01 -> 05) instead of tracking in git
 data/processed/*
 !data/processed/.gitkeep
 demo_uploads/

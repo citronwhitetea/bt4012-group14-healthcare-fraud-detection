@@ -1,5 +1,10 @@
 # Comparison of 06b and 06c model results
 
+> **Earlier analysis.** This compares the 13 October runs of 06b and 06c, when logistic regression used a fixed
+> 22-feature list. The final model choice uses the later 06c run with fold-level VIF (`lr_all`, `lr_vif10`, `lr_vif5`);
+> see `reports/final_model_evaluation.md`. The conclusion here (boosting is not clearly better than logistic
+> regression) is consistent with that final comparison.
+
 Analysis date: 18 October 2026. All reported performance is development cross-validation or out-of-fold (OOF) performance, not held-out test performance.
 
 ## Recommendation
