@@ -59,6 +59,19 @@ Intervals use the existing notebook protocol: 2,000 label-stratified provider bo
 
 The 80% recall objective was selected on validation predictions; test recall is an observation, not a constraint to retune against. Do not change the selected model or threshold based on these results. Upstream full-dataset EDA/feature development and network-feature dependencies remain limitations, so this is not a completely isolated end-to-end evaluation. PotentialFraud is a proxy label, not proof of misconduct.
 
+**Physician-network leak, measured after evaluation (15 November 2026).** `AvgPhysicianProviderSpread` was computed from all providers' claims, including test providers. Recomputed from training providers only, it does not change the selection: the joint validation rule still picks LightGBM / original, and mean fold AP moves from 0.674 to between 0.672 and 0.677 (fold SD about 0.025). The frozen model and this held-out result are unchanged; the leak's effect on the held-out result is not estimated, because that would reuse test labels. See `reports/leakfree_retraining.md`.
+
+**Supplementary ensemble evaluation, then withdrawn (15 November 2026).** Notebook 06g found that an equal average of LightGBM and logistic regression scored higher on development data (+0.012 mean fold AP on 15 new splits). The ensemble and its 80%-recall threshold (0.131) were committed as the final model before testing (`artifacts/shared/ensemble_final_selection.json`). It was then evaluated once on the held-out set, the second use of these labels. Results:
+
+| Test set | Ensemble | Frozen LightGBM | Paired 95% interval of difference |
+|---|---:|---:|---|
+| AP | 0.759 | 0.754 | −0.016 to +0.027 |
+| Precision | 0.494 | 0.486 | −0.024 to +0.042 |
+| Recall | 0.832 (84 of 101) | 0.851 (86 of 101) | −0.069 to +0.030 |
+| Providers flagged | 170 | 177 | |
+
+After seeing these results, the team withdrew the ensemble and kept the frozen LightGBM as the final model. The stated reason is that the ensemble missed two more fraud providers, and minimising missed fraud is the priority. **This reversal is test-informed** and contrary to the pre-test commitment. The two-case difference is within noise, and no metric difference is statistically distinguishable. The frozen model, its threshold and the result above are unchanged; the ensemble result is supplementary. Records: `artifacts/ensemble/20261115_201844_full_leakfree/test_metrics.json` and `artifacts/shared/ensemble_heldout_evaluation.json`.
+
 ## Reproducibility disclosures
 
 The threshold rationale was recorded in the run metadata after the training run was frozen but before the held-out evaluation; the threshold itself was selected during validation and remained unchanged. The pipeline fingerprint was verified unchanged. No claim is made that retraining would reproduce byte-identical serialized files.

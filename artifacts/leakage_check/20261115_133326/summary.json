@@ -1,0 +1,76 @@
+{
+  "physician_feature_change": [
+    {
+      "providers": "train",
+      "n": 4328,
+      "share changed": 0.2959796672828096,
+      "mean |change|": 0.0688154161816212,
+      "max |change|": 2.0,
+      "mean before": 1.3520942423056794,
+      "mean after": 1.2832788261240582,
+      "Spearman before vs after": 0.897361961702347
+    },
+    {
+      "providers": "test",
+      "n": 1082,
+      "share changed": 0.29944547134935307,
+      "mean |change|": 0.059560180990955544,
+      "max |change|": 1.0,
+      "mean before": 1.3676775679843967,
+      "mean after": 1.3081173869934413,
+      "Spearman before vs after": 0.8963238198100667
+    }
+  ],
+  "frozen_config_effect": [
+    {
+      "model": "LightGBM (frozen config)",
+      "mean fold AP, baseline": 0.6739574162132673,
+      "mean fold AP, fixed": 0.6671912132552709,
+      "mean fold diff": -0.006766202957996526,
+      "folds worse": 4,
+      "pooled AP, baseline": 0.671978933464591,
+      "pooled AP, fixed": 0.6689293037174956,
+      "pooled AP diff 95% CI": "-0.0116 to +0.0060",
+      "ROC AUC, baseline": 0.9352681086218346,
+      "ROC AUC, fixed": 0.9339595862325065,
+      "precision at \u226580% recall, baseline": 0.46219686162624823,
+      "precision at \u226580% recall, fixed": 0.46153846153846156,
+      "share reviewed, baseline": 0.16196857670979667,
+      "share reviewed, fixed": 0.1621996303142329
+    },
+    {
+      "model": "LR, fold VIF<10 (06c config)",
+      "mean fold AP, baseline": 0.6647255593947767,
+      "mean fold AP, fixed": 0.6649464817167898,
+      "mean fold diff": 0.0002209223220129175,
+      "folds worse": 1,
+      "pooled AP, baseline": 0.6623770135577856,
+      "pooled AP, fixed": 0.6624679782696129,
+      "pooled AP diff 95% CI": "-0.0006 to +0.0007",
+      "ROC AUC, baseline": 0.9309831541117122,
+      "ROC AUC, fixed": 0.9311367276869867,
+      "precision at \u226580% recall, baseline": 0.46494992846924177,
+      "precision at \u226580% recall, fixed": 0.46494992846924177,
+      "share reviewed, baseline": 0.1615064695009242,
+      "share reviewed, fixed": 0.1615064695009242
+    }
+  ],
+  "lgbm_search_best": [
+    {
+      "variant": "baseline",
+      "config_id": 13,
+      "ap_mean": 0.6739574162132673,
+      "ap_std": 0.025790658617351886
+    },
+    {
+      "variant": "fixed",
+      "config_id": 0,
+      "ap_mean": 0.6723211511617911,
+      "ap_std": 0.01446791895729403
+    }
+  ],
+  "lgbm_search_configs_improved": 5,
+  "n_boot": 2000,
+  "seed": 4012,
+  "test_labels_read": false
+}

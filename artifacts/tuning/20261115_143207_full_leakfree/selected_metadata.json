@@ -1,0 +1,108 @@
+{
+  "run_id": "20261115_143207_full_leakfree",
+  "quick_run": false,
+  "development_only": true,
+  "test_set_used": false,
+  "feature_variant": "leakfree",
+  "train_path": "../data/processed/provider_features_train_leakfree.csv",
+  "feature_order": [
+    "NumClaims",
+    "PropInpatient",
+    "AvgClaimAmt",
+    "MedianClaimAmt",
+    "StdClaimAmt",
+    "MaxClaimAmt",
+    "DeductibleToReimbursementRatio",
+    "AvgNumDiagnosisCodes",
+    "AvgNumProcedureCodes",
+    "AvgNumPhysiciansInvolved",
+    "NumUniqueAttendingPhysicians",
+    "NumUniqueOperatingPhysicians",
+    "AvgAgeOfBeneficiaries",
+    "PropDeceasedBeneficiaries",
+    "AvgChronicConditions",
+    "AvgClaimsPerBeneficiary",
+    "AvgClaimDurationDays",
+    "AvgLengthOfStayDays",
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "AvgPhysicianProviderSpread",
+    "TopBeneficiaryClaimShare",
+    "BenfordMAD",
+    "BenfordMADMissing"
+  ],
+  "params": {
+    "learning_rate": 0.03918716983846663,
+    "num_leaves": 85,
+    "max_depth": 3,
+    "min_child_samples": 7,
+    "subsample": 0.8370015262071977,
+    "colsample_bytree": 0.7131587028542571,
+    "reg_lambda": 0.0015175701987135421,
+    "reg_alpha": 0.006102183521089097,
+    "min_split_gain": 0.8089078366960303,
+    "subsample_freq": 1
+  },
+  "n_estimators_final": 148,
+  "trees_per_fold": [
+    179,
+    126,
+    148,
+    98,
+    291
+  ],
+  "search": {
+    "sampler": "TPE",
+    "pruner": "median",
+    "n_trials": 150,
+    "seed": 4012,
+    "early_stopping": {
+      "max_trees": 3000,
+      "patience": 100,
+      "inner_fraction": 0.2,
+      "metric": "average_precision"
+    }
+  },
+  "shared_fold_ap": {
+    "optuna_best_mean": 0.6844379958756245,
+    "frozen_config_mean": 0.6766224369067195
+  },
+  "nested_cv": {
+    "new_mean": 0.6700126692747157,
+    "old_mean": 0.6751392443393488,
+    "diff_mean": -0.0051265750646331655,
+    "diff_sd": 0.008184637979347806,
+    "trials_per_outer_fold": 40,
+    "inner_folds": 3
+  },
+  "repeated_cv": {
+    "splits": 15,
+    "diff_mean": -0.0020380377222902015,
+    "diff_sd": 0.01432347386585447,
+    "optuna_wins": 5
+  },
+  "operating_point_80_recall": {
+    "Optuna best (early stopping)": {
+      "threshold": 0.15533962860825978,
+      "precision": 0.46262341325811,
+      "recall": 0.8098765432098766,
+      "share reviewed": 0.1638170055452865,
+      "pooled OOF AP": 0.676907644959685,
+      "ROC AUC": 0.9366704115960637
+    },
+    "Frozen 06b configuration": {
+      "threshold": 0.08674259390497861,
+      "precision": 0.46285714285714286,
+      "recall": 0.8,
+      "share reviewed": 0.16173752310536044,
+      "pooled OOF AP": 0.6759987163569963,
+      "ROC AUC": 0.9359478605123944
+    }
+  },
+  "versions": {
+    "lightgbm": "4.6.0",
+    "optuna": "4.1.0"
+  }
+}

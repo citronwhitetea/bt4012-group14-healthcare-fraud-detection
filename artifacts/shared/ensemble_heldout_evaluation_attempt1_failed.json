@@ -1,0 +1,8 @@
+{
+  "status": "failed",
+  "selected_run": "artifacts/ensemble/20261115_201844_full_leakfree",
+  "started_at": "2026-11-15T21:02:59.882256+08:00",
+  "selection_record": "artifacts/shared/ensemble_final_selection.json",
+  "selection_commit": "492403e0658891d5742058fae636cfbd317e4a0e 2026-11-15T21:02:49+08:00",
+  "error": "ModuleNotFoundError: No module named 'src'"
+}

@@ -1,0 +1,10 @@
+{
+  "status": "completed",
+  "selected_run": "artifacts/ensemble/20261115_201844_full_leakfree",
+  "started_at": "2026-11-15T21:03:40.256111+08:00",
+  "selection_record": "artifacts/shared/ensemble_final_selection.json",
+  "selection_commit": "317e260d50a12e451422c65e5b6cecdacacccc32 2026-11-15T21:03:28+08:00",
+  "completed_at": "2026-11-15T21:04:04.662645+08:00",
+  "test_metrics_sha256": "de3c04595370e021c38c9ccb3b726a30b75456037b05f1e6b54c261d39a4d264",
+  "test_predictions_sha256": "c92a2c81ecc19b9646e7f3be4d404ed486ced1610c1d35cee3b40e7899aa3703"
+}
