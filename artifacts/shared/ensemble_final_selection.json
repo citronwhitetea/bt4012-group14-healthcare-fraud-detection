@@ -1,0 +1,119 @@
+{
+  "status": "approved_before_test",
+  "decision": "The LightGBM + logistic regression ensemble is the final model. Its held-out result is reported as the final result whatever it scores, including if it is below the first evaluation's LightGBM result. The test score is not used to choose between models.",
+  "approval_source": "Confirmed by the user in the Claude Code session on 15 November 2026. Team agreement is not separately recorded here.",
+  "approval_date": "2026-11-15",
+  "model": "ensemble",
+  "members": {
+    "lgbm": "LightGBM, original class balance, leak-free 06b config",
+    "lr": "logistic regression (liblinear) with fold-local VIF<10, original class balance, leak-free 06c config"
+  },
+  "combination": "equal-weight average of predicted probabilities",
+  "weights": {
+    "lgbm": 0.5,
+    "lr": 0.5
+  },
+  "run_dir": "artifacts/ensemble/20261115_201844_full_leakfree",
+  "source_notebook": "06g",
+  "base_runs": {
+    "boosting": "20261115_134434_full_leakfree",
+    "logistic_random_forest": "20261115_135414_full_leakfree"
+  },
+  "feature_variant": "leakfree",
+  "feature_order": [
+    "NumClaims",
+    "PropInpatient",
+    "AvgClaimAmt",
+    "MedianClaimAmt",
+    "StdClaimAmt",
+    "MaxClaimAmt",
+    "DeductibleToReimbursementRatio",
+    "AvgNumDiagnosisCodes",
+    "AvgNumProcedureCodes",
+    "AvgNumPhysiciansInvolved",
+    "NumUniqueAttendingPhysicians",
+    "NumUniqueOperatingPhysicians",
+    "AvgAgeOfBeneficiaries",
+    "PropDeceasedBeneficiaries",
+    "AvgChronicConditions",
+    "AvgClaimsPerBeneficiary",
+    "AvgClaimDurationDays",
+    "AvgLengthOfStayDays",
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "TopDiagnosisCodeShareMissing",
+    "TopProcedureCodeShareMissing",
+    "AvgPhysicianProviderSpread",
+    "TopBeneficiaryClaimShare",
+    "BenfordMAD",
+    "BenfordMADMissing"
+  ],
+  "id_col": "Provider",
+  "target": "PotentialFraud",
+  "missing_value_cols": [
+    "TopDiagnosisCodeShare",
+    "TopProcedureCodeShare",
+    "BenfordMAD"
+  ],
+  "threshold": 0.13095580025345355,
+  "threshold_rule": {
+    "rule": "min_recall",
+    "value": 0.8
+  },
+  "threshold_rationale": "Same rule the team agreed on 24 October 2026: among thresholds with at least 80% recall on development OOF predictions, choose the highest precision. Applied to the ensemble's shared-fold OOF scores (06g Section 5).",
+  "selection_evidence": {
+    "shared_folds_mean_fold_ap": {
+      "lgbm": 0.6774343625601434,
+      "ensemble": 0.6927409553499004
+    },
+    "repeated_cv_15_new_splits": {
+      "mean AP": 0.6932148404867705,
+      "mean difference vs LightGBM": 0.012094274097646665,
+      "SD of difference": 0.016586098479638715,
+      "splits better than LightGBM": 11
+    },
+    "note": "Chosen on development data only (06g). The pair was first noticed on the shared folds; repeated CV on new splits is the main evidence."
+  },
+  "oof_metrics": {
+    "threshold": 0.13095580025345355,
+    "ap": 0.6904711475852076,
+    "roc_auc": 0.9360120593020584,
+    "precision": 0.48,
+    "recall": 0.8,
+    "f1": 0.6,
+    "flagged_share": 0.15596118299445472,
+    "tn": 3572,
+    "fp": 351,
+    "fn": 81,
+    "tp": 324
+  },
+  "files": {
+    "ensemble_pipeline": "artifacts/ensemble/20261115_201844_full_leakfree/ensemble_pipeline.joblib",
+    "run_metadata": "artifacts/ensemble/20261115_201844_full_leakfree/selected_metadata.json",
+    "oof_predictions": "artifacts/ensemble/20261115_201844_full_leakfree/oof_predictions.csv",
+    "repeated_cv": "artifacts/ensemble/20261115_201844_full_leakfree/repeated_cv.csv",
+    "nested_cv": "artifacts/ensemble/20261115_201844_full_leakfree/nested_cv.csv",
+    "notebook": "notebooks/06g_ensemble.ipynb",
+    "train": "data/processed/provider_features_train_leakfree.csv",
+    "test": "data/processed/provider_features_test_leakfree.csv",
+    "folds": "artifacts/shared/cv_folds.csv",
+    "feature_code": "src/features.py"
+  },
+  "fingerprints_sha256": {
+    "ensemble_pipeline": "bfa95720a5b5ad874adc0df47f49a521a6d54cd949747e2fe95fc398a306ac73",
+    "run_metadata": "27703e25dd20d4b617135cddc7e2c422f0088542048db9caaef0889675b22557",
+    "oof_predictions": "e110462a7a62b8dad3c3e6589da4e1c5c7abb3db4ed5ad6a85d3867d3696d5f5",
+    "repeated_cv": "91d6171699db35d13c069704f2f175f7670e600f1b3a8638e7c79e8ff22bbdcc",
+    "nested_cv": "adf2e6bfdb6e9e3905102597097f59f071a7efdb27140040d1f26175df7813c1",
+    "notebook": "2bb07aef5a4d244648f388619634fe94272af1c36d884c281a0db9cf532c40d9",
+    "train": "bd33c2483d3768f62e0e6ecab24493a9a4b7a61165a3d59c1d55c87c93350f86",
+    "test": "0e386a608d17e1c42fc7f6e0e8ff19b770bf68c64568e259aa3accfe400a3e09",
+    "folds": "257e07580d0bd7c2be6ce699e96fa414bd974d87b1e6c8484453a7e4932f1cfc",
+    "feature_code": "f65a9f2735cfbf4d13ab8b4d21ffa911e481902d7a3e01890a5b8b640a220608"
+  },
+  "test_code": "scripts/run_ensemble_test.py",
+  "test_code_sha256": "8cf0f492632e472276f845d1762d8964262cabeeb73628081b794c53b2cbdffb",
+  "disclosure": "This is the second use of the held-out test set. The first evaluation (24 October 2026, frozen LightGBM, threshold 0.0861: AP 0.754, recall 0.851, precision 0.486) was known when this decision was made, and a supplementary 90%-recall policy check used the test set on 1 November 2026. The ensemble was selected on development cross-validation only, and its threshold was fixed on OOF predictions before this record was committed. Both test results are reported.",
+  "recorded_at": "2026-11-15T21:02:14.005164+08:00",
+  "oof_metrics_note": "Computed in memory in 06g (324 of 405 caught, 675 flagged). One OOF score equals the threshold; after the CSV round trip it sits 5.6e-17 below it, so recomputing from oof_predictions.csv gives 323 caught (recall 0.7975). The next-nearest score is 4.4e-4 from the threshold."
+}

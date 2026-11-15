@@ -389,13 +389,13 @@ def build_code_concentration_features(df: pd.DataFrame) -> pd.DataFrame:
     claims that have a code at all; a provider with zero coded claims of a
     given type gets NaN from value_counts.
 
-    NaN is filled with the MEAN among providers who do have coded claims,
-    not 0 — 0 would mean "many different codes, none dominant," which is
-    the opposite of "no codes recorded at all," and would silently distort
-    the signal (confirmed: a 0-fill flipped TopProcedureCodeShare's effect
-    size from Cohen's d = -0.89 to +0.11, since 62.6% of providers have zero
-    procedure-coded claims). The *Missing flags record which providers were
-    filled, mirroring the BenfordMAD pattern below.
+    NaN is left as NaN, with a *Missing flag. Imputation belongs inside the
+    model pipeline, fitted on training rows only: a fill value computed here
+    would come from every provider passed in, including held-out ones. Never
+    fill with 0 — 0 would mean "many different codes, none dominant," the
+    opposite of "no codes recorded" (a 0-fill flipped TopProcedureCodeShare's
+    effect size from Cohen's d = -0.89 to +0.11, since 62.6% of providers
+    have zero procedure-coded claims).
 
     Counter-intuitive EDA finding (computed by excluding, not 0-filling,
     the no-code providers — see notebooks/03b_provider_level_eda.ipynb):
@@ -416,24 +416,25 @@ def build_code_concentration_features(df: pd.DataFrame) -> pd.DataFrame:
 
     features["TopDiagnosisCodeShareMissing"] = features["TopDiagnosisCodeShare"].isna().astype(int)
     features["TopProcedureCodeShareMissing"] = features["TopProcedureCodeShare"].isna().astype(int)
-
-    features["TopDiagnosisCodeShare"] = features["TopDiagnosisCodeShare"].fillna(
-        features["TopDiagnosisCodeShare"].mean()
-    )
-    features["TopProcedureCodeShare"] = features["TopProcedureCodeShare"].fillna(
-        features["TopProcedureCodeShare"].mean()
-    )
     return features
 
 
-def build_physician_network_features(df: pd.DataFrame) -> pd.DataFrame:
+def build_physician_network_features(df: pd.DataFrame, reference_providers=None) -> pd.DataFrame:
     """
     AvgPhysicianProviderSpread: for each physician a provider uses (in an
     attending or operating role), how many DIFFERENT providers does that
-    physician also bill under, averaged across the provider's physicians.
-    Requires looking across the whole claims table (not just one provider's
-    rows), since a physician's provider count depends on their claims
-    everywhere, not just at this provider.
+    physician also bill under, averaged across the provider's physician-claim
+    rows. Unlike every other feature here, it depends on other providers'
+    claims, not just this provider's.
+
+    reference_providers sets whose claims count towards a physician's
+    provider total. None uses every provider in df (the original definition),
+    which leaks held-out providers' claims into training features when df
+    covers train and test. Pass the training providers instead: a reference
+    provider counts itself once, and any other provider counts as
+    (reference providers sharing the physician) + 1, i.e. scored as if it
+    alone had joined the reference set — so held-out providers never
+    influence each other or the training rows.
 
     Counter-intuitive EDA finding: fraud providers' physicians are actually
     LESS shared with other providers (1.14 vs 1.38, Cohen's d = -0.45) —
@@ -442,10 +443,20 @@ def build_physician_network_features(df: pd.DataFrame) -> pd.DataFrame:
     phys_long = pd.concat([
         df[["Provider", "AttendingPhysician"]].rename(columns={"AttendingPhysician": "Physician"}),
         df[["Provider", "OperatingPhysician"]].rename(columns={"OperatingPhysician": "Physician"}),
-    ]).dropna()
+    ], ignore_index=True).dropna()
 
-    physician_provider_counts = phys_long.drop_duplicates().groupby("Physician")["Provider"].nunique()
-    phys_long["NumProvidersForPhysician"] = phys_long["Physician"].map(physician_provider_counts)
+    pairs = phys_long.drop_duplicates()
+    if reference_providers is None:
+        in_reference = pd.Series(True, index=phys_long.index)
+    else:
+        reference = set(reference_providers)
+        in_reference = phys_long["Provider"].isin(reference)
+        pairs = pairs[pairs["Provider"].isin(reference)]
+
+    physician_provider_counts = pairs.groupby("Physician")["Provider"].nunique()
+    phys_long["NumProvidersForPhysician"] = (
+        phys_long["Physician"].map(physician_provider_counts).fillna(0) + (~in_reference).astype(int)
+    )
 
     features = phys_long.groupby("Provider").agg(
         AvgPhysicianProviderSpread=("NumProvidersForPhysician", "mean"),
@@ -498,10 +509,9 @@ def build_benford_features(df: pd.DataFrame, min_claims: int = 20) -> pd.DataFra
     InscClaimAmtReimbursed. Only computed for providers with >= min_claims
     claims — Benford's Law needs a reasonable sample to be meaningful, and
     38.6% of providers fall below that. Those providers get
-    BenfordMADMissing=1 and BenfordMAD filled with the dataset-wide mean
-    (not 0 — a 0-fill would misleadingly imply perfect Benford conformity
-    for a provider we simply couldn't test), so the flag carries the real
-    signal for "insufficient data" rather than the value itself.
+    BenfordMADMissing=1 and BenfordMAD left as NaN for the model pipeline to
+    impute from training rows (never 0 — a 0-fill would imply perfect
+    Benford conformity for a provider we simply couldn't test).
 
     Nuance vs. the aggregate-level Benford check in Step 3
     (notebooks/03a_claim_level_eda.ipynb): pooling Fraud vs Non-Fraud
@@ -526,7 +536,6 @@ def build_benford_features(df: pd.DataFrame, min_claims: int = 20) -> pd.DataFra
     features = df[["Provider"]].drop_duplicates().reset_index(drop=True)
     features["BenfordMAD"] = features["Provider"].map(benford_mad_by_provider)
     features["BenfordMADMissing"] = features["BenfordMAD"].isna().astype(int)
-    features["BenfordMAD"] = features["BenfordMAD"].fillna(features["BenfordMAD"].mean())
     return features
 
 
@@ -534,12 +543,17 @@ def build_benford_features(df: pd.DataFrame, min_claims: int = 20) -> pd.DataFra
 # Full pipeline
 # ---------------------------------------------------------------------------
 
-def build_provider_features(df: pd.DataFrame) -> pd.DataFrame:
+def build_provider_features(df: pd.DataFrame, reference_providers=None) -> pd.DataFrame:
     """
     Run the claim-level feature pipeline, then all provider-level
     aggregation blocks, merging into a single provider-level feature table
     with the PotentialFraud label attached last (not used as an input to
     any feature above).
+
+    TopDiagnosisCodeShare, TopProcedureCodeShare and BenfordMAD keep NaN
+    (with *Missing flags) for the model pipeline to impute.
+    reference_providers is passed to build_physician_network_features();
+    give it the training providers when building model inputs.
     """
     df = build_claim_level_features(df)
 
@@ -550,7 +564,7 @@ def build_provider_features(df: pd.DataFrame) -> pd.DataFrame:
     beneficiary = build_beneficiary_features(df)
     duration = build_duration_features(df)
     code_concentration = build_code_concentration_features(df)
-    physician_network = build_physician_network_features(df)
+    physician_network = build_physician_network_features(df, reference_providers)
     beneficiary_concentration = build_beneficiary_concentration_features(df)
     benford = build_benford_features(df)
 

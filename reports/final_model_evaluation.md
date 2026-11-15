@@ -59,6 +59,8 @@ Intervals use the existing notebook protocol: 2,000 label-stratified provider bo
 
 The 80% recall objective was selected on validation predictions; test recall is an observation, not a constraint to retune against. Do not change the selected model or threshold based on these results. Upstream full-dataset EDA/feature development and network-feature dependencies remain limitations, so this is not a completely isolated end-to-end evaluation. PotentialFraud is a proxy label, not proof of misconduct.
 
+**Physician-network leak, measured after evaluation (15 November 2026).** `AvgPhysicianProviderSpread` was computed from all providers' claims, including test providers. Recomputed from training providers only, it does not change the selection: the joint validation rule still picks LightGBM / original, and mean fold AP moves from 0.674 to between 0.672 and 0.677 (fold SD about 0.025). The frozen model and this held-out result are unchanged; the leak's effect on the held-out result is not estimated, because that would reuse test labels. See `reports/leakfree_retraining.md`.
+
 ## Reproducibility disclosures
 
 The threshold rationale was recorded in the run metadata after the training run was frozen but before the held-out evaluation; the threshold itself was selected during validation and remained unchanged. The pipeline fingerprint was verified unchanged. No claim is made that retraining would reproduce byte-identical serialized files.
