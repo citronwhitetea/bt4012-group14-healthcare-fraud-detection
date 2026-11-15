@@ -1,5 +1,5 @@
 {
-  "status": "approved_before_test",
+  "status": "withdrawn_after_test",
   "decision": "The LightGBM + logistic regression ensemble is the final model. Its held-out result is reported as the final result whatever it scores, including if it is below the first evaluation's LightGBM result. The test score is not used to choose between models.",
   "approval_source": "Confirmed by the user in the Claude Code session on 15 November 2026. Team agreement is not separately recorded here.",
   "approval_date": "2026-11-15",
@@ -123,5 +123,12 @@
       "change": "Evaluation script now adds the repository root to sys.path; test_code_sha256 updated. Model, members, weights, threshold, data and decision are unchanged.",
       "reason": "Attempt 1 (artifacts/shared/ensemble_heldout_evaluation_attempt1_failed.json) failed with ModuleNotFoundError while loading the saved pipeline, before the test table was read. No test predictions or labels were produced or seen."
     }
-  ]
+  ],
+  "withdrawal": {
+    "date": "2026-11-15T21:28:24.780577+08:00",
+    "decided_by": "The user, in the Claude Code session on 15 November 2026",
+    "final_model": "The frozen LightGBM (artifacts/boosting/20261011_232303_full, threshold 0.0861) remains the final model, as recorded in final_model_selection.json.",
+    "reason_given": "The ensemble missed 17 of 101 test fraud providers versus LightGBM's 15, and the team prioritises minimising missed fraud.",
+    "disclosure": "This withdrawal was made after seeing the ensemble's test result, contrary to the commitment above, so it is test-informed. The 2-case difference is within noise (paired 95% interval for the recall difference -0.069 to +0.030). The ensemble's test result is kept and reported as supplementary."
+  }
 }
