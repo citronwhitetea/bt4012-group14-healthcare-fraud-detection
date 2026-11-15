@@ -112,8 +112,16 @@
     "feature_code": "f65a9f2735cfbf4d13ab8b4d21ffa911e481902d7a3e01890a5b8b640a220608"
   },
   "test_code": "scripts/run_ensemble_test.py",
-  "test_code_sha256": "8cf0f492632e472276f845d1762d8964262cabeeb73628081b794c53b2cbdffb",
+  "test_code_sha256": "d9db71ae8f70f3da748718cdfe3fac1b08c9ea00d2432cb8a22838e22b3dc15e",
   "disclosure": "This is the second use of the held-out test set. The first evaluation (24 October 2026, frozen LightGBM, threshold 0.0861: AP 0.754, recall 0.851, precision 0.486) was known when this decision was made, and a supplementary 90%-recall policy check used the test set on 1 November 2026. The ensemble was selected on development cross-validation only, and its threshold was fixed on OOF predictions before this record was committed. Both test results are reported.",
   "recorded_at": "2026-11-15T21:02:14.005164+08:00",
-  "oof_metrics_note": "Computed in memory in 06g (324 of 405 caught, 675 flagged). One OOF score equals the threshold; after the CSV round trip it sits 5.6e-17 below it, so recomputing from oof_predictions.csv gives 323 caught (recall 0.7975). The next-nearest score is 4.4e-4 from the threshold."
+  "oof_metrics_note": "Computed in memory in 06g (324 of 405 caught, 675 flagged). One OOF score equals the threshold; after the CSV round trip it sits 5.6e-17 below it, so recomputing from oof_predictions.csv gives 323 caught (recall 0.7975). The next-nearest score is 4.4e-4 from the threshold.",
+  "amendments": [
+    {
+      "date": "2026-11-15",
+      "after_commit": "492403e",
+      "change": "Evaluation script now adds the repository root to sys.path; test_code_sha256 updated. Model, members, weights, threshold, data and decision are unchanged.",
+      "reason": "Attempt 1 (artifacts/shared/ensemble_heldout_evaluation_attempt1_failed.json) failed with ModuleNotFoundError while loading the saved pipeline, before the test table was read. No test predictions or labels were produced or seen."
+    }
+  ]
 }

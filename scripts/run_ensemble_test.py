@@ -12,11 +12,14 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))   # the saved LR pipeline references src.fold_vif
 SELECTION = ROOT / "artifacts/shared/ensemble_final_selection.json"
 MARKER = ROOT / "artifacts/shared/ensemble_heldout_evaluation.json"
 FIRST_SELECTION = ROOT / "artifacts/shared/final_model_selection.json"
