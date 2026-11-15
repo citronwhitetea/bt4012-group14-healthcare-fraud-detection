@@ -145,6 +145,7 @@ Then: `evaluate_feature_significance()` → `compute_vif()` / `iterative_vif_sel
 - **Multicollinearity fixed in two passes** (see `ai.md` point 4). Iterative VIF elimination now drops 4 features (`AvgClaimAmt`, `TopBeneficiaryClaimShare`, `PropInpatient`, `NumUniqueOperatingPhysicians`) instead of the previous 3 — the new `TopBeneficiaryClaimShare` correlates with the provider-size features once `AvgClaimAmt` is already gone.
 - **Blocks 7-10 (the 5 new candidate features) were added after validation** in `03b`'s Extended Candidate Features section — each checked for effect size (Cohen's d) *and* redundancy against the existing 6 blocks before being added. `RoundNumberClaimRate` was tested and rejected (see `ai.md` point 7 — 0.99 correlation with `PropInpatient`, a false lead).
 - **A real bug was caught and fixed** in `TopProcedureCodeShare`'s missing-value handling — see `ai.md` point 8. Do not 0-fill a concentration/share metric for "no data" cases; fill with the mean among valid rows and flag the fill instead.
+- **Update (15 Nov): no more all-provider fills or counts in `src/features.py`.** The mean fill above used every provider, test providers included. `build_provider_features()` now leaves `TopDiagnosisCodeShare`, `TopProcedureCodeShare` and `BenfordMAD` as NaN (with their `*Missing` flags), and the model pipeline imputes them from training rows. `AvgPhysicianProviderSpread` now takes a `reference_providers` set, so only training providers are counted (see `ai.md` point 10). **To keep the frozen model reproducible, `04b` re-applies the old mean fill**, so `provider_features_{train,test}.csv` are byte-identical to the fingerprints in the final selection record. The leak-free versions are `provider_features_{train,test}_leakfree.csv` (built by `06e`).
 - **Two feature sets maintained deliberately:** full 26-feature set for tree-based/boosting models, 22-feature VIF-clean subset for logistic regression.
 
 **Verified:**
@@ -157,17 +158,47 @@ Then: `evaluate_feature_significance()` → `compute_vif()` / `iterative_vif_sel
 
 ---
 
-## Step 5: Train/Test Split & Class Imbalance Handling
-**Status:** ⬜ Not started
+## Step 5: Train/Test Split
+**Status:** ✅ Done
+**Notebook:** `notebooks/05_train_test_split.ipynb`
 
-**Planned approach:**
-- Split by **Provider**, not claim, to avoid the same provider's claims leaking across train and test sets
-- Apply class imbalance handling (SMOTE / class weights — TBD) **after** splitting, and **only** to the training set, to avoid leaking synthetic/resampled signal into evaluation
+- 80/20 stratified split by **Provider**: 4,328 train, 1,082 test (101 fraud). No provider appears in both.
+- Class imbalance is handled **inside each CV fold** in Step 6 (original, class weighting or SMOTE), never on the test set.
 
 ## Step 6: Core Modeling
-**Status:** ⬜ Not started
+**Status:** ✅ Done. Final model frozen and tested once on 24 Oct.
+**Notebooks:** `06b` (XGBoost/LightGBM, Pei), `06c` (logistic regression/random forest, Swei), `06d` (90% recall policy, Pei). Full details: `pei_work_summary_human.md` and `reports/final_model_evaluation.md`.
 
-Candidates per the README: logistic regression (using `logistic_features`), random forest, gradient boosting (using `full_features`), plus a possible "novel method" for extra credit — Benford's Law deviation (`BenfordMAD`, already built) or a graph/network feature (shared physicians/beneficiaries across providers) would fit here, since the relational structure for it already exists in the raw data.
+- **Final model:** LightGBM, original class balance, threshold 0.0861 (≥80% validation recall). It was chosen with the joint 1-SE rule across all 18 candidates.
+- **Held-out test:** AP 0.754, recall 85% (86 of 101 caught), precision 49%.
+- **90% recall policy (threshold 0.0241):** agreed afterwards and evaluated on the same test set, catching 96 of 101.
+
+## Step 6+: Post-Evaluation Checks (15 Nov, Yumin)
+**Status:** ✅ Done. None of this changed the final model.
+**Notebooks:** `06e_leakage_fixes_cv_check.ipynb`, `06f_optuna_early_stopping.ipynb`, `06g_ensemble.ipynb`. Write-ups: `reports/leakfree_retraining.md`, `reports/final_model_evaluation.md`.
+
+1. **Leakage fixes (06e, plus 06b/06c reruns with `FEATURE_VARIANT=leakfree`).**
+   - *What:* fixed the two all-provider calculations in Step 4b and re-measured.
+   - *Result:* LightGBM's CV score moved by less than fold noise (0.674 → 0.667–0.677), and the selection rule still picks LightGBM / original.
+   - *Why it matters:* the report can state the leak was found, fixed and shown not to matter.
+2. **Wider tuning (06f).**
+   - *What:* Optuna (150 trials) with early stopping, against 06b's 20 random configurations.
+   - *Result:* it looked +0.008 better on the folds it was tuned on, but was −0.005 under nested CV and −0.002 on 15 new splits.
+   - *Lesson:* "best of many tries on the same folds" flatters the winner. 06b's tuning was already enough.
+3. **Ensembles and CatBoost (06g).**
+   - *Result:* averaging LightGBM with logistic regression gave +0.012 AP on 15 new splits (better in 11 of 15), because the two models catch different fraud providers.
+   - *CatBoost:* as good as LightGBM alone, but adds nothing when combined with it.
+   - *Stacking:* no better than the simple average.
+4. **Ensemble test, then withdrawn.**
+   - *Lock-in:* the ensemble was committed as the final model before testing (`artifacts/shared/ensemble_final_selection.json`, commits `492403e`/`317e260`).
+   - *Test:* run once with `scripts/run_ensemble_test.py`: AP 0.759 vs 0.754, recall 83% (84 caught) vs 85% (86), precision 49.4% vs 48.6%. None of the differences is statistically meaningful.
+   - *Withdrawal:* the team then decided to keep LightGBM because the ensemble missed 2 more fraud providers. That decision came **after** seeing the test result, so it is disclosed as test-informed. The ensemble result is reported as supplementary.
+
+**Watch out for:**
+- **The test set has now been used three times:** 80% evaluation, 90% policy, ensemble. Don't use it again. Any new model or threshold is validation-only.
+- **To miss fewer fraud cases,** change the recall target on validation data, not the model.
+- **Reinstall from `requirements.txt`** (adds Optuna and CatBoost 1.2.8). CatBoost 1.2.7 downgrades numpy and breaks the pinned environment.
 
 ## Step 7: SHAP Evaluation & Report Assembly
-**Status:** ⬜ Not started
+**Status:** ✅ Done
+**Notebook:** `notebooks/07_shap_evaluation.ipynb`. Write-up: `reports/shap_evaluation.md`.
