@@ -5,7 +5,7 @@
 | Name | Responsibility |
 |---|---|
 | Jada Loau | Repo and pipeline setup; data loading, cleaning, EDA and provider-level feature engineering (`src/`, notebooks 01–04) |
-| Tan Yumin | EDA notebooks, feature engineering and train/test split (notebooks 03–05) |
+| Tan Yumin | EDA notebooks, feature engineering and train/test split (imbalance handling) (notebooks 03–05) |
 | Loo Pei En | Boosting models, final model selection and held-out evaluation, high-recall review policy, Streamlit dashboard (06b, 06d, `dashboard/`) |
 | Tan Wei Jian | Logistic regression and random forest models, fold-level VIF, SHAP evaluation (06c, 07, `src/fold_vif.py`) |
 
