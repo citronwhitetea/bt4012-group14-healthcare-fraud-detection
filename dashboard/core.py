@@ -785,7 +785,7 @@ def validation_outcome(bundle: ModelBundle, threshold: float) -> dict | None:
 
 
 def recall_threshold(bundle: ModelBundle, target: float) -> float | None:
-    """Threshold for a recall target on validation (out-of-fold) scores, with the rule used in 06b and 06d:
+    """Threshold for a recall target on validation (out-of-fold) scores, with the rule used in 06b and 08:
     the highest precision among thresholds whose recall is at least the target."""
     if bundle.reference_scores is None or bundle.reference_labels is None:
         return None
@@ -831,7 +831,7 @@ def what_if_options(bundle: ModelBundle, targets=(0.90, 0.95), exclude: float | 
 
 
 # --------------------------------------------------------------------------------------
-# The exploratory review policy (notebook 06d), kept separate from the frozen final model
+# The exploratory review policy (notebook 08), kept separate from the frozen final model
 # --------------------------------------------------------------------------------------
 @dataclass
 class ReviewPolicy:

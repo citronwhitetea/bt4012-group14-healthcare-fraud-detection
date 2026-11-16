@@ -61,7 +61,7 @@ The 80% recall objective was selected on validation predictions; test recall is 
 
 **Physician-network leak, measured after evaluation (15 November 2026).** `AvgPhysicianProviderSpread` was computed from all providers' claims, including test providers. Recomputed from training providers only, it does not change the selection: the joint validation rule still picks LightGBM / original, and mean fold AP moves from 0.674 to between 0.672 and 0.677 (fold SD about 0.025). The frozen model and this held-out result are unchanged; the leak's effect on the held-out result is not estimated, because that would reuse test labels. See `reports/leakfree_retraining.md`.
 
-**Supplementary ensemble evaluation, then withdrawn (15 November 2026).** Notebook 06g found that an equal average of LightGBM and logistic regression scored higher on development data (+0.012 mean fold AP on 15 new splits). The ensemble and its 80%-recall threshold (0.131) were committed as the final model before testing (`artifacts/shared/ensemble_final_selection.json`). It was then evaluated once on the held-out set, the second use of these labels. Results:
+**Supplementary ensemble evaluation, then withdrawn (15 November 2026).** Notebook 09c found that an equal average of LightGBM and logistic regression scored higher on development data (+0.012 mean fold AP on 15 new splits). The ensemble and its 80%-recall threshold (0.131) were committed as the final model before testing (`artifacts/shared/ensemble_final_selection.json`). It was then evaluated once on the held-out set, the second use of these labels. Results:
 
 | Test set | Ensemble | Frozen LightGBM | Paired 95% interval of difference |
 |---|---:|---:|---|

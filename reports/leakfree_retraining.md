@@ -9,22 +9,22 @@ Analysis date: 15 November 2026, after the final held-out evaluation. Developmen
 - **Physician network.** `AvgPhysicianProviderSpread` counted each physician's providers across all 5,410 providers' claims, so test providers shaped training providers' values. `build_physician_network_features(df, reference_providers=...)` now counts only a reference set. A reference provider counts itself once; any other provider is scored as if it alone had joined the reference set.
 - **All-provider fills.** `TopDiagnosisCodeShare`, `TopProcedureCodeShare` and `BenfordMAD` were filled with means over all providers. `build_provider_features()` now leaves them NaN for the model pipeline to impute from training rows. The modelling notebooks already re-imputed these per fold, so this changes no score.
 
-The canonical tables (`provider_features_{train,test}.csv`) still reproduce the frozen fingerprints, so the frozen model, its threshold, the held-out evaluation and the dashboard are unchanged. Leak-free tables are `provider_features_{train,test}_leakfree.csv` (built by notebook 06e).
+The canonical tables (`provider_features_{train,test}.csv`) still reproduce the frozen fingerprints, so the frozen model, its threshold, the held-out evaluation and the dashboard are unchanged. Leak-free tables are `provider_features_{train,test}_leakfree.csv` (built by notebook 09a).
 
 ## Two measurements
 
 | Measurement | Reference providers for the physician feature | LightGBM / original, mean fold AP |
 |---|---|---:|
 | Frozen run (`boosting/20261011_232303_full`) | All 5,410 providers | 0.6740 |
-| 06e, frozen configuration | Each fold's training providers only (fully fold-clean) | 0.6672 |
-| 06e, best of the same 20 configurations | Each fold's training providers only | 0.6723 |
+| 09a, frozen configuration | Each fold's training providers only (fully fold-clean) | 0.6672 |
+| 09a, best of the same 20 configurations | Each fold's training providers only | 0.6723 |
 | Leak-free retrain, frozen configuration | The 4,328 training providers | 0.6766 |
 | Leak-free retrain, selected configuration | The 4,328 training providers | 0.6774 |
 
 - **The leak-free retrain** removes test providers from the feature, which is what matters for a model evaluated on the held-out set. Inside its cross-validation, validation-fold providers still count towards training-fold values, so its CV figure is slightly optimistic for this one feature.
-- **06e** removes the validation fold as well. It is the strictest estimate, but it uses fewer providers per count, which also makes the feature noisier.
+- **09a** removes the validation fold as well. It is the strictest estimate, but it uses fewer providers per count, which also makes the feature noisier.
 
-The true effect lies between these and is indistinguishable from fold noise. In 06e the bootstrap interval for the pooled-AP difference was −0.0116 to +0.0060.
+The true effect lies between these and is indistinguishable from fold noise. In 09a the bootstrap interval for the pooled-AP difference was −0.0116 to +0.0060.
 
 ## Retrain: joint selection, canonical vs leak-free
 

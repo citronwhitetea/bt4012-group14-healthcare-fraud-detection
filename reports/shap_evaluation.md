@@ -37,7 +37,7 @@ Notebook: `notebooks/07_shap_evaluation.ipynb` (section 9 holds the Benford foll
 - **Agreement with gain importance.** The ranking agrees moderately with LightGBM's gain importance: Spearman 0.70, and 6 of the top 10 in common. The main disagreements are MedianClaimAmt (SHAP 6 vs gain 23), PropDeceasedBeneficiaries (7 vs 17), TopProcedureCodeShare (8 vs 3) and AvgAgeOfBeneficiaries (17 vs 6). Gain measures training-loss reduction; SHAP measures effect on held-out scores. They are not interchangeable.
 
 ### 2. Concentration features agree with the EDA
-Lower **TopProcedureCodeShare**, **TopBeneficiaryClaimShare** and **TopDiagnosisCodeShare** all raise the score (Spearman of value vs SHAP: −0.85, −0.81 and −0.45). In other words, the model treats more diverse coding and a broader patient base as riskier. This matches the counter-intuitive effects found in EDA (04b: fraud providers have lower concentration; Cohen's d −0.89 and −0.75). The model therefore uses these features in the direction the data support, not the "templated billing" direction one might expect.
+Lower **TopProcedureCodeShare**, **TopBeneficiaryClaimShare** and **TopDiagnosisCodeShare** all raise the score (Spearman of value vs SHAP: −0.85, −0.81 and −0.45). In other words, the model treats more diverse coding and a broader patient base as riskier. This matches the counter-intuitive effects found in EDA (04: fraud providers have lower concentration; Cohen's d −0.89 and −0.75). The model therefore uses these features in the direction the data support, not the "templated billing" direction one might expect.
 
 ### 3. The three missing-value flags are never used
 `TopDiagnosisCodeShareMissing`, `TopProcedureCodeShareMissing` and `BenfordMADMissing` have **zero splits** and zero SHAP. They duplicate information the model already has:
@@ -91,7 +91,7 @@ The feature is never the largest push for a flagged provider, and it never decid
 
    So any genuine digit signal is weak at best, though it does point in the expected direction (fraud deviates slightly more).
 
-**Consequence for earlier write-ups.** The EDA statement that per-provider Benford reveals "a modest but real difference … aggregating had masked it" (d = −0.54; 04b and the `build_benford_features` docstring in `src/features.py`) is explained by claim volume. The final report should not repeat it as a fraud signal.
+**Consequence for earlier write-ups.** The EDA statement that per-provider Benford reveals "a modest but real difference … aggregating had masked it" (d = −0.54; 04 and the `build_benford_features` docstring in `src/features.py`) is explained by claim volume. The final report should not repeat it as a fraud signal.
 
 ### 5. PropDeceasedBeneficiaries looks weakly supported
 It ranks 7th by SHAP, but its mean push is about zero in both classes (+0.004 fraud vs −0.004 non-fraud). Its largest pushes go to providers with 2–5% deceased beneficiaries (mean +0.75), whose fraud rate is only 7%. By contrast, the band above 0% and up to 2% has a 29% fraud rate but a mean push of only +0.08. These are marginal comparisons and SHAP is conditional on the other features, but this is the feature most likely to be moving scores without discriminating. It is a candidate for review in any retraining.

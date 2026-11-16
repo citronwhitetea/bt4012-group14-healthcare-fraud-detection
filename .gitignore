@@ -228,3 +228,9 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 demo_uploads/
+
+# Local virtual environments under other names (never commit these)
+.bt4012grp/
+
+# Executed notebook copies written by `bash run_pipeline.sh models`
+artifacts/reruns/

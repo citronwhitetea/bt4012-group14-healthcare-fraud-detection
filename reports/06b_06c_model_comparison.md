@@ -137,4 +137,4 @@ Finish the new 06c comparison using the same development split. Choose the opera
 
 All 13 distinct model/strategy combinations, including the shared dummy, were joined by provider and checked for matching labels/folds and complete predictions. AP, ROC AUC and precision-maximizing thresholds were independently checked against scikit-learn. Saved selected-model metrics and Brier scores were reproduced. The chart was visually inspected. Source artifacts and notebook files were left unchanged.
 
-![Model comparison](/Users/tanwj/bt4012-group14-healthcare-fraud-detection/reports/figures/06b_06c_model_comparison.png)
+![Model comparison](figures/06b_06c_model_comparison.png)

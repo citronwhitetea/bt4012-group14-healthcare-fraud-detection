@@ -7,7 +7,7 @@ Output: either the same claim-level shape with engineered columns added
 
 This module is the single source of truth for claim-level derived columns —
 both build_provider_features() (which aggregates them up) and
-notebooks/04a_basic_claim_level_feature_engineering.ipynb (which explores
+notebooks/03b_claim_level_feature_engineering.ipynb (which explores
 them at claim grain) call build_claim_level_features() rather than each
 computing their own version.
 
@@ -202,7 +202,7 @@ def build_claim_level_features(df: pd.DataFrame) -> pd.DataFrame:
     diagnosis/procedure counts first; repeat-claiming needs a stable sort).
     Returns the claim-level df with all engineered columns added — the
     single source of truth consumed by both build_provider_features() below
-    and notebooks/04a_basic_claim_level_feature_engineering.ipynb.
+    and notebooks/03b_claim_level_feature_engineering.ipynb.
     """
     df = add_claim_type_flags(df)
     df = add_financial_flags(df)
@@ -378,7 +378,7 @@ def build_duration_features(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # Candidate fraud-signal features (billing pattern, physician/beneficiary
 # network) — surfaced in the "Extended Candidate Features" section of
-# notebooks/03b_provider_level_eda.ipynb, where each one's effect size and
+# notebooks/03c_provider_level_eda.ipynb, where each one's effect size and
 # redundancy against the blocks above was checked before being added here.
 # ---------------------------------------------------------------------------
 
@@ -398,7 +398,7 @@ def build_code_concentration_features(df: pd.DataFrame) -> pd.DataFrame:
     have zero procedure-coded claims).
 
     Counter-intuitive EDA finding (computed by excluding, not 0-filling,
-    the no-code providers — see notebooks/03b_provider_level_eda.ipynb):
+    the no-code providers — see notebooks/03c_provider_level_eda.ipynb):
     fraud providers have LOWER concentration than non-fraud (more diverse
     coding, not more repetitive/templated) — TopProcedureCodeShare has the
     largest effect size of any feature tested so far (Cohen's d = -0.89;

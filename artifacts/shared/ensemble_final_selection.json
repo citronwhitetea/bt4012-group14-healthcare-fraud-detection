@@ -122,6 +122,12 @@
       "after_commit": "492403e",
       "change": "Evaluation script now adds the repository root to sys.path; test_code_sha256 updated. Model, members, weights, threshold, data and decision are unchanged.",
       "reason": "Attempt 1 (artifacts/shared/ensemble_heldout_evaluation_attempt1_failed.json) failed with ModuleNotFoundError while loading the saved pipeline, before the test table was read. No test predictions or labels were produced or seen."
+    },
+    {
+      "date": "2026-11-17",
+      "change": "Notebook file renamed from notebooks/06g_ensemble.ipynb to notebooks/09c_ensemble.ipynb when the repository's notebooks were renumbered so that number order is run order. Markdown text only was updated to the new notebook names (title '06g' -> '09c'; references to 06e and 06f -> 09a and 09b). No code cell, output, model, threshold, data or decision changed.",
+      "reason": "Repository tidy-up for submission, made after the held-out evaluation and withdrawal. The fingerprints above are the originals recorded before testing and are deliberately left unchanged; files.notebook keeps the original path.",
+      "notebook_sha256_after_change": "152823458e2fbf2f05a2e6d6d8b8bf0d3cd2aac6d162614ab33cb915efc5f814"
     }
   ],
   "withdrawal": {

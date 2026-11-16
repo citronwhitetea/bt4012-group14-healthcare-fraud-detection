@@ -1,10 +1,10 @@
 # Data Dictionary
 
-Column-level reference for all four raw CSVs. Use this alongside `notebooks/00_setup_guide.ipynb` when writing cleaning/feature engineering code, so everyone has the same understanding of what each column means.
+Column-level reference for all four raw CSVs. Use this alongside the README's setup steps when writing cleaning/feature engineering code, so everyone has the same understanding of what each column means.
 
 ---
 
-## `provider_label.csv` — Provider-level labels
+## `provider_labels.csv` — Provider-level labels
 **Grain:** one row per provider (5,410 rows)
 
 | Column | Type | Description |
