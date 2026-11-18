@@ -17,7 +17,7 @@ We rank healthcare providers by fraud risk from their Medicare claims, so an inv
 
 | Metric | Value | 95% bootstrap interval |
 |---|---:|---|
-| Average precision | 0.754 | 0.680–0.827 |
+| Average precision | 0.754 | 0.680–0.826 |
 | ROC AUC | 0.960 | 0.944–0.973 |
 | Recall (fraud providers caught) | 0.851 (86 of 101) | 0.772–0.921 |
 | Precision (flags that are labelled fraud) | 0.486 | 0.435–0.539 |
@@ -224,13 +224,5 @@ The records are in `artifacts/shared/`. Anything done after the first evaluation
 - `scripts/provenance/` keeps exact copies of the code run on 24 October, including one teammate's local file paths. They are records, not entry points; use `scripts/run_final_test.py`.
 - Some `reports/06b_06c_model_comparison.md` figures come from earlier 13 October runs that are not committed. The report says so at the top, and its conclusion matches the final comparison.
 
-## Team
-
-| Name | Responsibility |
-|---|---|
-| Jada Loau | Repo and pipeline setup; data loading, cleaning, EDA and provider-level feature engineering (`src/`, notebooks 01–04) |
-| Tan Yumin | EDA notebooks, train/test split and imbalance handling (03–05); leakage fixes, wider tuning and ensembles (09a–09c) |
-| Loo Pei En | Boosting models, final model selection and held-out evaluation, high-recall review policy, Streamlit dashboard (06b, 08, `dashboard/`) |
-| Tan Wei Jian | Logistic regression and random forest, fold-level VIF, SHAP evaluation (06c, 07, `src/fold_vif.py`) |
 
 AI tools were used during this project, as acknowledged in the final report.
