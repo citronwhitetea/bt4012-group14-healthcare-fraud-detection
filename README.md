@@ -45,7 +45,7 @@ Every notebook is committed **with its outputs**, so you can read the whole proj
 
 ### 1. Set up the environment
 
-Use **Python 3.9–3.11** (tested on 3.9, 3.10 and 3.11). Python 3.13 cannot install the pinned packages.
+Use **Python 3.10 or 3.11**. The pinned packages do not install on Python 3.9 (too old) or 3.13 (too new). macOS ships Python 3.9 as `python3`, so check `python3 --version` first; if needed, install 3.11 with `brew install python@3.11` and use `python3.11 -m venv .venv`. If you use conda instead: `conda create -n bt4012 python=3.11 -y && conda activate bt4012`, then run the `pip install` line below.
 
 ```bash
 git clone https://github.com/citronwhitetea/bt4012-group14-healthcare-fraud-detection.git
@@ -86,7 +86,7 @@ It ends with `All done.` and a list of the steps it completed. Retraining the mo
 
 On Windows without Git Bash or WSL, open the notebooks in Jupyter and run them in number order instead: `00a, 00b, 00c, 01, 02, 03a, 03b, 03c, 04, 05, 07, 08`. Then run `python -m pytest tests/ -q` and `python scripts/run_final_test.py`.
 
-### 4. (Optional) Open the dashboard
+### 4. Open the dashboard
 
 ```bash
 pip install -r requirements-dashboard.txt
@@ -212,7 +212,7 @@ The records are in `artifacts/shared/`. Anything done after the first evaluation
 | Problem | Fix |
 |---|---|
 | `Library not loaded: libomp.dylib` (macOS) | `brew install libomp` |
-| `pip install` fails on a pinned version | Check the Python version is 3.9–3.11 |
+| `pip install` fails on a pinned version | Check the Python version is 3.10 or 3.11 |
 | `FileNotFoundError` for `data/raw/...` | Download and rename the four Kaggle files (step 2) |
 | `FileNotFoundError` for `..._leakfree.csv` in 09b/09c | Run `09a` first (`bash run_pipeline.sh models` does this in order) |
 | `run_pipeline.sh` reports `MISMATCH` | The rebuilt data differs from what the final model used; check the raw files are the Kaggle **Train** files |
