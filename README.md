@@ -12,8 +12,11 @@ We rank healthcare providers by fraud risk from their Medicare claims, so an inv
 | XGBoost | 0.670 |
 | Logistic regression (fold-local VIF < 10) | 0.665 |
 | Random forest | 0.663 |
+| *Business rule: audit the largest claims first (`MaxClaimAmt`)* | *0.486* |
 
-**Held-out test (1,082 providers, 101 labelled fraudulent), evaluated once on 24 Oct 2026:**
+The business-rule row is a benchmark with nothing to train: it ranks providers by one feature, scored on the same folds (06c, section 13). Every model beats it by 0.18–0.19 AP.
+
+**Held-out test (1,082 providers, 101 labelled fraudulent); the final model was evaluated once, on 24 Oct 2026:**
 
 | Metric | Value | 95% bootstrap interval |
 |---|---:|---|
@@ -132,7 +135,7 @@ Add a notebook name to start partway through a stage, e.g. `bash run_pipeline.sh
 | 05 | `05_train_test_split` | Stratified 80/20 split by provider; SMOTE and undersampling explored | `provider_features_{train,test}.csv` |
 | **Model and test** | | | |
 | 06b | `06b_boosting_models` | XGBoost, LightGBM × original / class weight / SMOTE-NC; holds the guarded final test | `artifacts/boosting/<run>/` |
-| 06c | `06c_logistic_random_forest_models` | Logistic regression (all features, fold-local VIF<10, VIF<5) and random forest × the same strategies | `artifacts/logistic_random_forest/<run>/` |
+| 06c | `06c_logistic_random_forest_models` | Logistic regression (all features, fold-local VIF<10, VIF<5) and random forest × the same strategies; single-feature business-rule benchmark | `artifacts/logistic_random_forest/<run>/` |
 | **After the test** | | | |
 | 07 | `07_shap_evaluation` | SHAP explanations of the frozen model's test scores | `reports/shap_evaluation/` |
 | 08 | `08_high_recall_policy_and_misses` | Compares 80/90/95% recall review policies; analyses the missed cases | `reports/error_analysis/` |
@@ -188,6 +191,7 @@ The records are in `artifacts/shared/`. Anything done after the first evaluation
 
 - **Labels are "potential fraud", not proven fraud,** so the model learns to rank providers like past investigation outcomes, and its flags are for review, not for decisions.
 - **One year of data (Nov 2008 – Dec 2009) from one source.** Fraud patterns change once detection rules are known, so the model would need regular retraining and monitoring.
+- **One feature used test providers.** `AvgPhysicianProviderSpread` counted each physician's providers across all 5,410 providers, including the test set. Recomputed from training providers only, the selection is unchanged and LightGBM's mean fold AP stays within 0.007 of 0.674 (09a, [`reports/leakfree_retraining.md`](reports/leakfree_retraining.md)). Its effect on the held-out score is not estimated, because that would reuse the test labels.
 - **Cross-validation estimates are slightly optimistic,** because the same folds were used to tune and to score; the single held-out test is the reliable figure.
 - **The test set was reused after the final evaluation** (see the disclosure above); those later results are supplementary only.
 
