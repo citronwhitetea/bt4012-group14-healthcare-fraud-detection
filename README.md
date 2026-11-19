@@ -225,4 +225,5 @@ The records are in `artifacts/shared/`. Anything done after the first evaluation
 - Some `reports/06b_06c_model_comparison.md` figures come from earlier 13 October runs that are not committed. The report says so at the top, and its conclusion matches the final comparison.
 
 
-AI tools were used during this project, as acknowledged in the final report.
+## Acknowledgement of AI Use
+Generative AI tools, including Claude and Claude Code (Anthropic), were used to help write and debug code, check analyses and edit documentation. All modelling decisions, results and interpretations were reviewed by the team, who take full responsibility for the submitted work. See the final report for the full acknowledgement.
