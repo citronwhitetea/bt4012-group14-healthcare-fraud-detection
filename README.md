@@ -1,6 +1,6 @@
 # BT4012 Group 14 — Healthcare Provider Fraud Detection
 
-We rank healthcare providers by fraud risk from their Medicare claims, so an investigation team knows whom to audit first. The final model is **LightGBM trained on the original class balance**, with a review threshold of **0.0861**, chosen on validation data for at least 80% recall.
+We rank healthcare providers by fraud risk from their Medicare claims, so an investigation team knows whom to audit first. The final model is **LightGBM trained on the original class balance**. Its threshold of **0.0861**, chosen on validation data for at least 80% recall, was frozen and evaluated once on the held-out set; that is the project's official result. For the review queue, the team then chose a **90% validation recall target (threshold 0.0241)**, which the dashboard uses. Both use the same model and scores; only the cut-off for flagging differs.
 
 ## Results at a glance
 
@@ -25,6 +25,8 @@ The business-rule row is a benchmark with nothing to train: it ranks providers b
 | Recall (fraud providers caught) | 0.851 (86 of 101) | 0.772–0.921 |
 | Precision (flags that are labelled fraud) | 0.486 | 0.435–0.539 |
 | Providers flagged for review | 16% (177 of 1,082) | |
+
+**Chosen review policy (90% validation recall target, threshold 0.0241).** On validation it catches 365 of 405 fraud providers (90.1%) while flagging 23.9% of providers. On the test set it caught 96 of 101 and flagged 260 of 1,082 (24%), with precision 0.369. It was chosen on validation predictions only, but after the official result was known, so these test figures are supplementary rather than an independent test (see [Test-set use](#test-set-use-disclosure)).
 
 The test AP is above the development value (0.674). That is not overfitting, which would push the test score down: the test set holds only 101 fraud cases, so its estimate is noisy, and its interval starts just above the development value. Full write-up: [`reports/final_model_evaluation.md`](reports/final_model_evaluation.md).
 
@@ -91,12 +93,14 @@ On Windows without Git Bash or WSL, open the notebooks in Jupyter and run them i
 
 ### 4. Open the dashboard
 
+Run step 3 first: the dashboard scores `data/processed/provider_features_test.csv`, which the pipeline builds. Without it, the app still opens and you can score a file with **Score another file**.
+
 ```bash
 pip install -r requirements-dashboard.txt
 streamlit run dashboard/app.py
 ```
 
-It scores the held-out providers with the frozen model and shows each provider's score and the factors behind it. Details: [`dashboard/README.md`](dashboard/README.md).
+It scores the held-out providers with the frozen model, flags them at the chosen 90% target (threshold 0.0241), and shows each provider's score and the factors behind it. Details: [`dashboard/README.md`](dashboard/README.md).
 
 ### Running everything
 
@@ -173,7 +177,7 @@ Only 9.4% of providers are labelled fraudulent, but they file 38% of all claims.
 5. **Models** (06b, 06c). 18 candidates (LightGBM, XGBoost, random forest and three logistic-regression variants, each with original data, class weighting or SMOTE-NC), compared on the same 5 provider folds (`artifacts/shared/cv_folds.csv`) by mean fold average precision. Imputation, SMOTE-NC and VIF selection are fitted inside each training fold.
 6. **Selection and threshold.** Candidates within one standard error of the best were treated as tied; the simplest imbalance strategy was preferred (original, then class weighting, then SMOTE). The threshold is the most precise one reaching 80% recall on out-of-fold predictions. Both rules were recorded before testing in `artifacts/shared/final_model_selection.json`.
 7. **One held-out evaluation** (24 Oct 2026), with bootstrap confidence intervals.
-8. **Explanations, review policy and robustness checks** (07, 08, 09a–09c).
+8. **Explanations, review policy and robustness checks** (07, 08, 09a–09c). Notebook 08 compares 80%, 90% and 95% recall targets on validation data; the team chose 90% (threshold 0.0241) for the review queue.
 
 ## Test-set use (disclosure)
 
@@ -182,7 +186,7 @@ The test set was used three times. Only the first is the project's final result.
 | Date | What | Result | Status |
 |---|---|---|---|
 | 24 Oct | Frozen LightGBM, 80%-recall threshold | AP 0.754, 86/101 caught | **Final result** |
-| 1 Nov | Same model, 90%-recall threshold (08) | 96/101 caught, 24% flagged | Supplementary; proposed after seeing the first result |
+| 1 Nov | Same model, 90%-recall threshold (08) | 96/101 caught, 24% flagged | Adopted as the dashboard's review policy; supplementary, because it was proposed after seeing the first result |
 | 15 Nov | LightGBM + logistic regression average (09c) | AP 0.759, 84/101 caught | Locked in before testing, then withdrawn after testing (it missed 2 more cases); reported as supplementary |
 
 The records are in `artifacts/shared/`. Anything done after the first evaluation is development data only, or is labelled supplementary.
